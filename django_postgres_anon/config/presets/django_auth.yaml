@@ -1,0 +1,22 @@
+# Django Auth User Model Anonymization Rules
+- table: auth_user
+  column: email
+  function: anon.fake_email()
+  enabled: true
+  notes: "Standard Django user email"
+
+- table: auth_user
+  column: first_name
+  function: anon.fake_first_name()
+  enabled: true
+
+- table: auth_user
+  column: last_name
+  function: anon.fake_last_name()
+  enabled: true
+
+- table: auth_user
+  column: username
+  function: anon.fake_username()
+  enabled: false
+  notes: "Disabled by default - may break login"

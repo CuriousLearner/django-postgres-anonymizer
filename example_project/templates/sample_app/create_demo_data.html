@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Demo Data - Django PostgreSQL Anonymizer{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>Create Demo Data
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will create sample customers, orders, payments, and support tickets for demonstration purposes.
+                    You must be a superuser to perform this action.
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>What will be created:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>10 Demo users</li>
+                                <li><i class="fas fa-check text-success me-2"></i>10 Customer profiles</li>
+                                <li><i class="fas fa-check text-success me-2"></i>1-5 Orders per customer</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Payment records</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Support tickets (30% chance)</li>
+                                <li><i class="fas fa-check text-success me-2"></i>User activity logs</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Sample data includes:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-user me-2 text-primary"></i>Personal information (SSN, phone, etc.)</li>
+                                <li><i class="fas fa-map-marker-alt me-2 text-warning"></i>Address information</li>
+                                <li><i class="fas fa-dollar-sign me-2 text-success"></i>Financial data (income, credit scores)</li>
+                                <li><i class="fas fa-credit-card me-2 text-info"></i>Payment information</li>
+                                <li><i class="fas fa-globe me-2 text-secondary"></i>Activity tracking data</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Note:</strong> This demo data is randomly generated and not based on real people.
+                        It's designed to showcase anonymization features safely.
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Create Demo Data
+                        </button>
+                        <a href="{% url 'sample_app:index' %}" class="btn btn-outline-secondary btn-lg ms-2">
+                            <i class="fas fa-arrow-left me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="card mt-4">
+            <div class="card-body text-center">
+                <h6 class="card-title">After creating demo data, you can:</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <a href="{% url 'sample_app:customer_list' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-users me-1"></i>View Customers
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'sample_app:order_list' %}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-shopping-cart me-1"></i>View Orders
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'sample_app:anonymization_demo' %}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-mask me-1"></i>Try Anonymization
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+repos:
+  # Ruff - Fast Python linter and formatter (relaxed for pre-commit)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix, --select=F,I]  # Only pyflakes and imports for pre-commit
+      - id: ruff-format
+
+  # Black - Python code formatter
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3.10
+        args: [--line-length=120]
+
+  # isort - Python import sorting
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile=black, --line-length=120]
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-yaml
+        exclude: ^docker/
+      - id: detect-private-key
+      - id: forbid-new-submodules
+      - id: check-json
+      - id: pretty-format-json
+        args: [--autofix, --indent=2]
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-toml
+      - id: check-docstring-first
+      - id: debug-statements
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: name-tests-test
+        args: [--pytest-test-first]
+        exclude: ^tests/settings\.py$
+
+  # Security checks
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.10
+    hooks:
+      - id: bandit
+        args: [-ll, -x, tests/]
+        files: ^django_postgres_anon/
+
+  # Dockerfile linting (disabled for now)
+  # - repo: https://github.com/hadolint/hadolint
+  #   rev: v2.12.0
+  #   hooks:
+  #     - id: hadolint-docker
+  #       files: Dockerfile$
+  #       args: [--ignore=DL3042,--ignore=DL3059,--ignore=DL3007]
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [-d, relaxed]
+        exclude: ^docker/
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.43.0
+    hooks:
+      - id: markdownlint
+        args: [--fix, --config=.markdownlint.yaml]
+
+# Configuration
+default_language_version:
+  python: python3.10
+
+exclude: |
+  (?x)^(
+    .*\.egg-info/|
+    \.eggs/|
+    \.git/|
+    \.tox/|
+    build/|
+    dist/|
+    venv/|
+    __pycache__/|
+    \.pytest_cache/|
+    \.coverage|
+    htmlcov/|
+    docs/_build/|
+    example_project/static/|
+    example_project/media/
+  )
+
+ci:
+  autofix_prs: true
+  autofix_commit_msg: "[pre-commit.ci] auto fixes from hooks"
+  autoupdate_schedule: monthly

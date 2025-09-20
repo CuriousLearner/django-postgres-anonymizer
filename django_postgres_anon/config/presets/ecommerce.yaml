@@ -1,0 +1,37 @@
+# E-commerce Anonymization Rules
+- table: customers
+  column: email
+  function: anon.fake_email()
+  enabled: true
+  notes: "Customer email addresses"
+
+- table: customers
+  column: first_name
+  function: anon.fake_first_name()
+  enabled: true
+
+- table: customers
+  column: last_name
+  function: anon.fake_last_name()
+  enabled: true
+
+- table: customers
+  column: phone
+  function: anon.fake_phone()
+  enabled: true
+
+- table: orders
+  column: billing_address
+  function: anon.fake_address()
+  enabled: true
+
+- table: orders
+  column: shipping_address
+  function: anon.fake_address()
+  enabled: true
+
+- table: payment_methods
+  column: card_number
+  function: anon.partial({col}, 4, "****-****-****-", 4)
+  enabled: true
+  notes: "Show only last 4 digits of card"

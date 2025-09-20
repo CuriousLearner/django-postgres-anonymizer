@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Django PostgreSQL Anonymizer Demo{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Hero Section -->
+        <div class="card mb-4">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-shield-alt fa-4x text-primary mb-3"></i>
+                <h1 class="card-title">Django PostgreSQL Anonymizer</h1>
+                <p class="lead">
+                    A comprehensive Django app for database anonymization using PostgreSQL Anonymizer extension.
+                    This demo showcases the key features and capabilities.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        {% if user.is_superuser %}
+                            <a href="{% url 'sample_app:create_demo_data' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-plus-circle me-2"></i>Create Demo Data
+                            </a>
+                        {% else %}
+                            <a href="{% url 'sample_app:customer_list' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-users me-2"></i>View Customers
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        {% if user.is_superuser %}
+                            <a href="{% url 'sample_app:anonymization_demo' %}" class="btn btn-primary">
+                                <i class="fas fa-mask me-2"></i>Try Anonymization
+                            </a>
+                        {% elif user.is_authenticated %}
+                            <a href="{% url 'sample_app:context_manager_demo' %}" class="btn btn-primary">
+                                <i class="fas fa-mask me-2"></i>Context Manager Demo
+                            </a>
+                        {% else %}
+                            <a href="{% url 'sample_app:order_list' %}" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart me-2"></i>View Orders
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/admin/" class="btn btn-outline-secondary">
+                            <i class="fas fa-cog me-2"></i>Admin Panel
+                        </a>
+                    </div>
+                </div>
+                {% if not user.is_authenticated %}
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Note:</strong> Some features require authentication.
+                    <a href="/admin/" class="alert-link">Login</a> to access anonymization demos, or
+                    <a href="/admin/" class="alert-link">login as admin</a> for full demo data management.
+                </div>
+                {% elif not user.is_superuser %}
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Note:</strong> Advanced features like demo data creation require admin access.
+                    <a href="/admin/" class="alert-link">Login as admin</a> for full functionality.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-database fa-2x text-primary mb-3"></i>
+                        <h5 class="card-title">Smart Rules Engine</h5>
+                        <p class="card-text">
+                            Create and manage anonymization rules with support for complex functions,
+                            constraints, and performance optimization hints.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-layer-group fa-2x text-success mb-3"></i>
+                        <h5 class="card-title">Preset Collections</h5>
+                        <p class="card-text">
+                            Pre-built anonymization presets for common scenarios like healthcare,
+                            finance, e-commerce, and more.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-users-cog fa-2x text-warning mb-3"></i>
+                        <h5 class="card-title">Role-Based Access</h5>
+                        <p class="card-text">
+                            Dynamic role switching for masked data access with middleware support
+                            for seamless integration.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-terminal fa-2x text-info mb-3"></i>
+                        <h5 class="card-title">Management Commands</h5>
+                        <p class="card-text">
+                            Comprehensive Django management commands for initialization,
+                            rule application, validation, and data export.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start Guide -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-rocket me-2"></i>Quick Start Guide
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-play-circle text-primary me-2"></i>1. Initialize Extension</h6>
+                        <div class="code-block">
+                            <code>python manage.py anon_init</code>
+                        </div>
+
+                        <h6><i class="fas fa-plus text-success me-2"></i>2. Create Rules</h6>
+                        <div class="code-block">
+                            <code>python manage.py anon_load_yaml presets/django_auth.yaml</code>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-check text-warning me-2"></i>3. Apply Anonymization</h6>
+                        <div class="code-block">
+                            <code>python manage.py anon_apply</code>
+                        </div>
+
+                        <h6><i class="fas fa-download text-info me-2"></i>4. Export Anonymized Data</h6>
+                        <div class="code-block">
+                            <code>python manage.py anon_dump output.sql</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Demo Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                            <h4 class="mb-1">{{ customer_count }}</h4>
+                            <small class="text-muted">Customers</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-shopping-cart fa-2x text-success mb-2"></i>
+                            <h4 class="mb-1">{{ order_count }}</h4>
+                            <small class="text-muted">Orders</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-credit-card fa-2x text-warning mb-2"></i>
+                            <h4 class="mb-1">{{ payment_count }}</h4>
+                            <small class="text-muted">Payments</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-headset fa-2x text-info mb-2"></i>
+                            <h4 class="mb-1">{{ ticket_count }}</h4>
+                            <small class="text-muted">Tickets</small>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h6 class="mb-3">
+                    <i class="fas fa-shield-alt text-primary me-2"></i>Anonymization Status
+                </h6>
+                <div class="mb-2">
+                    <small class="text-muted">Masking Rules:</small>
+                    <span class="badge bg-primary ms-2">{{ masking_rules_count }}</span>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Active Presets:</small>
+                    <span class="badge bg-success ms-2">{{ active_presets_count }}</span>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">User Activities:</small>
+                    <span class="badge bg-info ms-2">{{ activity_count }}</span>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                {% if user.is_superuser %}
+                    <a href="{% url 'sample_app:anonymization_demo' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                {% elif user.is_authenticated %}
+                    <a href="{% url 'sample_app:masking_comparison' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>View Comparison
+                    </a>
+                {% else %}
+                    <a href="{% url 'sample_app:customer_list' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>View Data
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="card mt-4 border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Security Notice
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>This is a demo environment.</strong>
+                </p>
+                <ul class="small mb-0">
+                    <li>Sample data is generated for demonstration</li>
+                    <li>PostgreSQL Anonymizer extension required</li>
+                    <li>Always test anonymization in development first</li>
+                    <li>Review all rules before applying to production</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

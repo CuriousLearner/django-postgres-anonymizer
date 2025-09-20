@@ -1,0 +1,271 @@
+# Social Media Platform Anonymization Rules
+# Suitable for social networks, forums, and community platforms
+
+# User Profiles
+- table: users
+  column: email
+  function: anon.fake_email()
+  enabled: true
+  notes: "User email addresses"
+
+- table: users
+  column: username
+  function: anon.fake_username()
+  enabled: false
+  notes: "Disabled - may break references"
+
+- table: users
+  column: display_name
+  function: anon.fake_name()
+  enabled: true
+
+- table: users
+  column: first_name
+  function: anon.fake_first_name()
+  enabled: true
+
+- table: users
+  column: last_name
+  function: anon.fake_last_name()
+  enabled: true
+
+- table: users
+  column: phone
+  function: anon.fake_phone()
+  enabled: true
+
+- table: users
+  column: date_of_birth
+  function: anon.random_date_between('1970-01-01', '2005-12-31')
+  enabled: true
+
+- table: users
+  column: bio
+  function: anon.lorem_ipsum()
+  enabled: true
+  notes: "User biography/about section"
+
+- table: users
+  column: location
+  function: anon.fake_city()
+  enabled: true
+
+- table: users
+  column: website
+  function: anon.fake_website()
+  enabled: true
+
+- table: users
+  column: ip_address
+  function: anon.fake_ip()
+  enabled: true
+
+# User Profile Details
+- table: user_profiles
+  column: address
+  function: anon.fake_address()
+  enabled: true
+
+- table: user_profiles
+  column: city
+  function: anon.fake_city()
+  enabled: true
+
+- table: user_profiles
+  column: state
+  function: anon.fake_state()
+  enabled: true
+
+- table: user_profiles
+  column: zip_code
+  function: anon.fake_zipcode()
+  enabled: true
+
+- table: user_profiles
+  column: company
+  function: anon.fake_company()
+  enabled: true
+
+- table: user_profiles
+  column: job_title
+  function: anon.fake_job_title()
+  enabled: true
+
+# Posts and Content
+- table: posts
+  column: title
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: posts
+  column: content
+  function: anon.lorem_ipsum()
+  enabled: true
+  notes: "Post content/body text"
+
+- table: posts
+  column: slug
+  function: anon.fake_slug()
+  enabled: true
+  depends_on_unique: true
+
+# Comments
+- table: comments
+  column: content
+  function: anon.lorem_ipsum()
+  enabled: true
+  notes: "Comment text"
+
+- table: comments
+  column: author_ip
+  function: anon.fake_ip()
+  enabled: true
+
+- table: comments
+  column: author_email
+  function: anon.fake_email()
+  enabled: true
+
+# Messages/DMs
+- table: messages
+  column: subject
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: messages
+  column: body
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: messages
+  column: recipient_email
+  function: anon.fake_email()
+  enabled: true
+
+# Forum Threads
+- table: threads
+  column: title
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: threads
+  column: description
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: threads
+  column: slug
+  function: anon.fake_slug()
+  enabled: true
+  depends_on_unique: true
+
+# Groups/Communities
+- table: groups
+  column: name
+  function: anon.fake_group_name()
+  enabled: true
+
+- table: groups
+  column: description
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: groups
+  column: invitation_code
+  function: anon.random_string(8)
+  enabled: true
+  depends_on_unique: true
+
+# Events
+- table: events
+  column: name
+  function: anon.fake_event_name()
+  enabled: true
+
+- table: events
+  column: description
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: events
+  column: location
+  function: anon.fake_address()
+  enabled: true
+
+# Social Media Specific
+- table: hashtags
+  column: name
+  function: anon.fake_hashtag()
+  enabled: false
+  notes: "May want to preserve hashtags for analytics"
+
+- table: mentions
+  column: mentioned_user
+  function: anon.fake_username()
+  enabled: false
+  notes: "Disabled - may break user relationships"
+
+# Analytics/Tracking (be careful with these)
+- table: user_sessions
+  column: session_id
+  function: anon.random_string(32)
+  enabled: true
+  depends_on_unique: true
+
+- table: user_sessions
+  column: ip_address
+  function: anon.fake_ip()
+  enabled: true
+
+- table: user_sessions
+  column: user_agent
+  function: anon.fake_user_agent()
+  enabled: true
+
+- table: page_views
+  column: visitor_id
+  function: anon.random_string(16)
+  enabled: true
+
+- table: page_views
+  column: ip_address
+  function: anon.fake_ip()
+  enabled: true
+
+# Media/File uploads
+- table: media_files
+  column: original_filename
+  function: anon.fake_filename()
+  enabled: true
+
+- table: media_files
+  column: uploaded_by_ip
+  function: anon.fake_ip()
+  enabled: true
+
+# Notifications
+- table: notifications
+  column: content
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: notifications
+  column: email_address
+  function: anon.fake_email()
+  enabled: true
+
+# Reviews/Ratings
+- table: reviews
+  column: title
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: reviews
+  column: content
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: reviews
+  column: reviewer_email
+  function: anon.fake_email()
+  enabled: true

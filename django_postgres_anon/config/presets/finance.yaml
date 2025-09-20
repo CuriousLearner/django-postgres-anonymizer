@@ -1,0 +1,123 @@
+# Financial Data Anonymization Rules
+# Suitable for banking, fintech, and financial services applications
+
+# Customer Information
+- table: customers
+  column: ssn
+  function: anon.fake_ssn()
+  enabled: true
+  notes: "Social Security Number"
+  performance_heavy: false
+  depends_on_unique: true
+
+- table: customers
+  column: tax_id
+  function: anon.fake_tax_id()
+  enabled: true
+  notes: "Tax ID/EIN number"
+  depends_on_unique: true
+
+- table: customers
+  column: email
+  function: anon.fake_email()
+  enabled: true
+
+- table: customers
+  column: phone
+  function: anon.fake_phone()
+  enabled: true
+
+- table: customers
+  column: first_name
+  function: anon.fake_first_name()
+  enabled: true
+
+- table: customers
+  column: last_name
+  function: anon.fake_last_name()
+  enabled: true
+
+- table: customers
+  column: date_of_birth
+  function: anon.random_date_between('1950-01-01', '2000-12-31')
+  enabled: true
+
+# Account Information
+- table: accounts
+  column: account_number
+  function: anon.fake_account_number()
+  enabled: true
+  depends_on_unique: true
+
+- table: accounts
+  column: routing_number
+  function: anon.fake_routing_number()
+  enabled: true
+
+- table: accounts
+  column: iban
+  function: anon.fake_iban()
+  enabled: true
+  depends_on_unique: true
+
+# Transaction Data
+- table: transactions
+  column: amount
+  function: anon.noise({col}, 0.1)
+  enabled: false
+  notes: "Disabled by default - adds 10% noise to amounts"
+  performance_heavy: true
+
+- table: transactions
+  column: description
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: transactions
+  column: reference_number
+  function: anon.random_string(12)
+  enabled: true
+  depends_on_unique: true
+
+# Credit Card Information
+- table: credit_cards
+  column: card_number
+  function: anon.fake_credit_card_number()
+  enabled: true
+  depends_on_unique: true
+
+- table: credit_cards
+  column: cvv
+  function: anon.random_string(3)
+  enabled: true
+
+- table: credit_cards
+  column: expiry_date
+  function: anon.random_date_between('2024-01-01', '2030-12-31')
+  enabled: true
+
+# Loan Information
+- table: loans
+  column: loan_number
+  function: anon.random_string(10)
+  enabled: true
+  depends_on_unique: true
+
+- table: loans
+  column: principal_amount
+  function: anon.noise({col}, 0.05)
+  enabled: false
+  notes: "Adds 5% noise to loan amounts"
+
+# Investment Data
+- table: investments
+  column: portfolio_id
+  function: anon.random_string(8)
+  enabled: true
+  depends_on_unique: true
+
+- table: investments
+  column: value
+  function: anon.noise({col}, 0.15)
+  enabled: false
+  notes: "Adds 15% noise to investment values"

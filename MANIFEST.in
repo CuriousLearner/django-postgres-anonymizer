@@ -1,0 +1,46 @@
+# Essential documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+
+# Package data
+recursive-include django_postgres_anon/templates *.html
+recursive-include django_postgres_anon/config *.yaml *.yml
+recursive-include django_postgres_anon/static *.css *.js *.png *.jpg *.gif *.svg
+recursive-include django_postgres_anon/locale *.po *.mo
+
+
+# Exclude unnecessary files
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store
+recursive-exclude * *.so
+recursive-exclude * .git*
+exclude .gitignore
+exclude .dockerignore
+recursive-exclude * *.egg-info
+recursive-exclude * build
+recursive-exclude * dist
+recursive-exclude * .tox
+recursive-exclude * .pytest_cache
+recursive-exclude * .coverage
+recursive-exclude * htmlcov
+recursive-exclude * .mypy_cache
+recursive-exclude * node_modules
+recursive-exclude * venv
+recursive-exclude * .venv
+recursive-exclude * env
+recursive-exclude * .env
+
+# Exclude development files from package distribution
+prune tests
+prune example_project
+prune docker
+exclude .pre-commit-config.yaml
+exclude .pre-commit-hooks.yaml
+exclude pytest.ini
+exclude tox.ini
+exclude .coveragerc
+exclude docker-compose.yml
+exclude docker-compose.test.yml
+exclude docker-compose.override.yml

@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Function Validator Demo - Django PostgreSQL Anonymizer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-check-circle me-2"></i>Function Validation Demo
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Test anonymization function syntax and get suggestions for different column types.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Function Tester -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-flask me-2"></i>Function Tester
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="function_expr" class="form-label">Anonymization Function</label>
+                        <input type="text" class="form-control" id="function_expr" name="function_expr"
+                               placeholder="e.g., anon.fake_email()" value="{{ request.POST.function_expr }}">
+                        <div class="form-text">Enter a PostgreSQL Anonymizer function to validate</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="column_type" class="form-label">Column Type for Suggestions</label>
+                        <select class="form-select" id="column_type" name="column_type">
+                            <option value="email" {% if request.POST.column_type == 'email' %}selected{% endif %}>Email</option>
+                            <option value="name" {% if request.POST.column_type == 'name' %}selected{% endif %}>Name</option>
+                            <option value="phone" {% if request.POST.column_type == 'phone' %}selected{% endif %}>Phone</option>
+                            <option value="ssn" {% if request.POST.column_type == 'ssn' %}selected{% endif %}>SSN</option>
+                            <option value="address" {% if request.POST.column_type == 'address' %}selected{% endif %}>Address</option>
+                            <option value="numeric" {% if request.POST.column_type == 'numeric' %}selected{% endif %}>Numeric</option>
+                            <option value="text" {% if request.POST.column_type == 'text' %}selected{% endif %}>Text</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Test Function
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Function Suggestions -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Function Suggestions
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if suggestions %}
+                    <p class="text-muted">Suggested functions for <strong>{{ request.POST.column_type|default:"email" }}</strong> columns:</p>
+                    {% for suggestion in suggestions %}
+                    <div class="border rounded p-2 mb-2">
+                        <code class="text-success">{{ suggestion.function }}</code>
+                        <br><small class="text-muted">{{ suggestion.description }}</small>
+                        <button class="btn btn-sm btn-outline-primary float-end"
+                                onclick="document.getElementById('function_expr').value='{{ suggestion.function }}'">
+                            Use This
+                        </button>
+                    </div>
+                    {% endfor %}
+                {% elif suggestion_error %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>{{ suggestion_error }}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Submit the form to get function suggestions.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Validation Results -->
+{% if validation_results %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list-check me-2"></i>Validation Results
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Function</th>
+                                <th>Status</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in validation_results %}
+                            <tr>
+                                <td><code>{{ result.function }}</code></td>
+                                <td>
+                                    {% if result.is_valid %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Valid
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>Invalid
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ result.message }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Common Functions Reference -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-book me-2"></i>Common Anonymization Functions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Basic Functions</h6>
+                        <ul class="list-unstyled">
+                            <li><code>anon.fake_email()</code> - Generate fake email</li>
+                            <li><code>anon.fake_first_name()</code> - Generate fake first name</li>
+                            <li><code>anon.fake_last_name()</code> - Generate fake last name</li>
+                            <li><code>anon.fake_phone()</code> - Generate fake phone</li>
+                            <li><code>anon.fake_company()</code> - Generate fake company</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Advanced Functions</h6>
+                        <ul class="list-unstyled">
+                            <li><code>anon.hash({col})</code> - Hash column value</li>
+                            <li><code>anon.partial({col}, 2, "***", 2)</code> - Partial masking</li>
+                            <li><code>anon.noise({col}, 0.1)</code> - Add numeric noise</li>
+                            <li><code>anon.random_string(10)</code> - Random string</li>
+                            <li><code>anon.lorem_ipsum()</code> - Lorem ipsum text</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <strong>Note:</strong> Use <code>{col}</code> as a placeholder for the column name in functions that need it.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{% url 'sample_app:context_manager_demo' %}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-code me-1"></i>Context Managers
+        </a>
+        <a href="{% url 'sample_app:masking_comparison' %}" class="btn btn-primary me-2">
+            <i class="fas fa-balance-scale me-1"></i>Data Comparison
+        </a>
+        <a href="{% url 'sample_app:anonymization_demo' %}" class="btn btn-success">
+            <i class="fas fa-arrow-left me-1"></i>Back to Demo
+        </a>
+    </div>
+</div>
+{% endblock %}

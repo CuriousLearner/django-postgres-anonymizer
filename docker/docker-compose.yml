@@ -1,0 +1,107 @@
+
+services:
+  # PostgreSQL database with anonymizer extension
+  db:
+    build:
+      context: ..
+      dockerfile: docker/postgres.Dockerfile
+    environment:
+      POSTGRES_DB: test_anon_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Run tests
+  test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: development
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/test_anon_db
+      DJANGO_SETTINGS_MODULE: tests.settings
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ../django_postgres_anon:/app/django_postgres_anon
+      - ../tests:/app/tests
+      - test_reports:/app/reports
+    command: pytest tests/ -v --tb=short --override-ini="addopts="
+
+  # Run linting and formatting checks
+  lint:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: development
+    volumes:
+      - ../django_postgres_anon:/app/django_postgres_anon
+      - ../tests:/app/tests
+      - ../example_project:/app/example_project
+    command: >
+      sh -c "
+        echo 'Running linting checks...' &&
+        flake8 django_postgres_anon tests --max-line-length=120 &&
+        black --check django_postgres_anon tests --line-length=120 &&
+        isort --check-only django_postgres_anon tests --profile=black &&
+        echo 'All checks passed!'
+      "
+
+  # Interactive development shell
+  shell:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: development
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/test_anon_db
+      DJANGO_SETTINGS_MODULE: tests.settings
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ../django_postgres_anon:/app/django_postgres_anon
+      - ../tests:/app/tests
+      - ../example_project:/app/example_project
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+
+  # Run the example project
+  example:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: development
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/test_anon_db
+      DJANGO_SETTINGS_MODULE: example_project.example_project.settings
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../django_postgres_anon:/app/django_postgres_anon
+      - ../example_project:/app/example_project
+    working_dir: /app/example_project
+    command: >
+      sh -c "
+        echo 'Setting up example project...' &&
+        python manage.py migrate &&
+        echo 'Starting development server...' &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+
+volumes:
+  postgres_data:
+  test_reports:

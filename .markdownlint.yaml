@@ -1,0 +1,9 @@
+# Markdownlint configuration
+default: true
+
+# Disable rules that are too strict for documentation
+MD013: false  # Disable line length checking
+MD024: false  # Allow duplicate headings
+MD029: false  # Allow different ordered list styles
+MD040: false  # Allow code blocks without language
+MD041: false  # Allow files to not start with top level heading

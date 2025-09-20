@@ -1,0 +1,90 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.pytest_cache
+.mypy_cache
+htmlcov
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media
+
+# Virtual environments
+venv
+.venv
+env
+.env
+ENV
+env.bak
+venv.bak
+
+# IDEs
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build artifacts
+build
+dist
+*.egg-info
+.eggs
+
+# Documentation
+docs/_build
+site
+
+# Node.js (if any)
+node_modules
+npm-debug.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# Docker
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+
+# CI/CD
+.github
+
+# Local development
+.env.local
+.env.development
+.env.production
+
+# Test reports
+reports
+htmlcov
+.coverage
+coverage.xml
+
+# Other
+*.orig

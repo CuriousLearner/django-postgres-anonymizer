@@ -1,0 +1,322 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-postgres-anonymizer"
+version = "0.1.0-alpha.1"
+description = "Django integration for PostgreSQL Anonymizer extension"
+readme = "README.md"
+license = {text = "BSD-3-Clause"}
+authors = [
+    {name = "Sanyam Khurana", email = "sanyam@sanyamkhurana.com"}
+]
+maintainers = [
+    {name = "Sanyam Khurana", email = "sanyam@sanyamkhurana.com"}
+]
+keywords = ["django", "postgresql", "anonymization", "privacy", "gdpr", "database", "security"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "Django>=3.2",
+    "psycopg2-binary>=2.8.0",
+    "PyYAML>=5.4.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-django>=4.5.0",
+    "pytest-cov>=4.0.0",
+    "pytest-env>=0.8.0",
+    "pytest-xdist>=3.0.0",
+    "coverage>=6.0.0",
+    "model-bakery>=1.20.0",
+]
+dev = [
+    "django-postgres-anonymizer[test]",
+    "black>=22.0.0",
+    "isort>=5.10.0",
+    "flake8>=5.0.0",
+    "ruff>=0.8.0",
+    "mypy>=0.990",
+    "bandit>=1.7.0",
+    "safety>=2.0.0",
+    "twine>=4.0.0",
+    "build>=0.8.0",
+    "pre-commit>=3.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/CuriousLearner/django-postgres-anonymizer"
+Documentation = "https://django-postgres-anonymizer.readthedocs.io/"
+Repository = "https://github.com/CuriousLearner/django-postgres-anonymizer"
+"Bug Tracker" = "https://github.com/CuriousLearner/django-postgres-anonymizer/issues"
+Changelog = "https://github.com/CuriousLearner/django-postgres-anonymizer/blob/main/CHANGELOG.md"
+
+[tool.setuptools]
+packages = ["django_postgres_anon"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+django_postgres_anon = [
+    "templates/django_postgres_anon/*.html",
+    "config/*.yaml",
+    "config/presets/*.yaml",
+    "static/django_postgres_anon/css/*.css",
+    "static/django_postgres_anon/js/*.js",
+]
+
+# Black configuration
+[tool.black]
+line-length = 120
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | migrations
+)/
+'''
+
+# isort configuration
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 120
+known_django = "django"
+known_first_party = "django_postgres_anon"
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+skip = ["migrations", "venv", ".venv", "env", ".env"]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["django_postgres_anon"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/env/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# Pytest configuration
+[tool.pytest.ini_options]
+pythonpath = ["."]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py", "*_pytest.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+    "-ra",
+    "--import-mode=importlib",
+    "--reuse-db",
+    "--nomigrations",
+    "--maxfail=100",
+    "--cov=django_postgres_anon",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=87",
+]
+testpaths = ["tests"]
+norecursedirs = [
+    ".git",
+    ".tox",
+    "dist",
+    "build",
+    "migrations",
+    "venv",
+    "env",
+    "node_modules",
+    "__pycache__",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::RuntimeWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests requiring PostgreSQL with anon extension",
+    "requires_db: marks tests that require database access",
+    "requires_anon: marks tests that require PostgreSQL anonymizer extension",
+    "api: marks tests for REST API endpoints",
+    "middleware: marks tests for middleware functionality",
+    "commands: marks tests for management commands",
+    "models: marks tests for Django models",
+    "utils: marks tests for utility functions",
+    "security: marks tests for security-related functionality",
+    "performance: marks tests that measure performance",
+    "unit: marks tests as unit tests (isolated, fast)",
+    "functional: marks tests as functional tests (end-to-end behavior)",
+    "smoke: marks tests as smoke tests (basic functionality)",
+    "regression: marks tests that prevent regression of specific bugs",
+]
+
+# Environment variables for testing
+[tool.pytest_env]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+TESTING = "true"
+DEBUG = "false"
+SECRET_KEY = "test-secret-key-for-testing-only"
+DATABASE_URL = "sqlite:///:memory:"
+CACHE_BACKEND = "django.core.cache.backends.locmem.LocMemCache"
+EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+ANONYMIZED_DATA_ROLE = "test_masked_reader"
+POSTGRES_ANON_AUTO_APPLY_RULES = "false"
+POSTGRES_ANON_VALIDATE_FUNCTIONS = "true"
+
+# MyPy configuration
+[tool.mypy]
+python_version = "3.8"
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = false  # Set to true when codebase is fully typed
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+strict_optional = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "django.*",
+    "yaml.*",
+    "psycopg2.*",
+]
+ignore_missing_imports = true
+
+# Bandit security linting configuration
+[tool.bandit]
+exclude_dirs = ["tests", "test_*.py", "*_test.py"]
+skips = ["B101", "B601"]  # Skip assert statements and shell injection (parameterized)
+
+# Ruff configuration (fast Python linter)
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "venv",
+    ".venv",
+    "*.egg-info",
+    ".tox",
+    ".pytest_cache",
+    "migrations",
+    "example_project/static",
+    "example_project/media",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "N",    # pep8-naming
+    "SIM",  # flake8-simplify
+    "RUF",  # Ruff-specific rules
+    "S",    # flake8-bandit (security)
+    "A",    # flake8-builtins
+    "C90",  # mccabe complexity
+    "ERA",  # eradicate (commented code)
+    "PL",   # pylint
+    "PERF", # performance anti-patterns
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # do not perform function calls in argument defaults
+    "B904",   # raise from
+    "S101",   # assert used (needed for tests)
+    "S105",   # hardcoded password (false positives in tests)
+    "S106",   # hardcoded password (false positives in tests)
+    "SIM105", # contextlib.suppress
+    "PLR0913", # too many arguments
+    "PLR2004", # magic value comparison
+    "PLR0912", # too many branches
+    "PERF203", # try-except in loop
+    "SIM102",  # use single if statement
+    "SIM103",  # return condition directly
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501", "F403", "F405", "S", "PLR", "ERA"]
+"*/migrations/*" = ["E501", "ERA"]
+"example_project/*" = ["E501", "F403", "F405", "ERA"]
+"__init__.py" = ["F401"]
+"conftest.py" = ["F401", "F403"]
+
+[tool.ruff.lint.isort]
+known-third-party = ["django", "pytest", "psycopg2", "yaml"]
+known-first-party = ["django_postgres_anon"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"

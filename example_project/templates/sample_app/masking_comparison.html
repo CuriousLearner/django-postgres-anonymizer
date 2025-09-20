@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}Data Masking Comparison - Django PostgreSQL Anonymizer{% endblock %}
+
+{% block extra_css %}
+<style>
+.comparison-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+.comparison-header {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+}
+
+.comparison-content {
+    padding: 1rem;
+}
+
+.data-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.data-field:last-child {
+    border-bottom: none;
+}
+
+.field-label {
+    font-weight: 500;
+    color: #495057;
+    min-width: 120px;
+}
+
+.field-value {
+    font-family: 'Courier New', monospace;
+    background-color: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid #e9ecef;
+}
+
+.field-value.anonymized {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.field-value.error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.rules-summary {
+    background-color: #e7f3ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-balance-scale me-2"></i>Data Masking Comparison
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Compare original data with anonymized versions to see the effects of masking rules.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Rules Summary -->
+{% if active_rules %}
+<div class="rules-summary">
+    <h5 class="mb-3">
+        <i class="fas fa-shield-alt text-primary me-2"></i>Active Masking Rules ({{ active_rules.count }})
+    </h5>
+    <div class="row">
+        {% for rule in active_rules %}
+        <div class="col-md-6 col-lg-4 mb-2">
+            <div class="badge bg-primary me-2 mb-1">
+                {{ rule.table_name }}.{{ rule.column_name }}
+            </div>
+            <small class="text-muted d-block">{{ rule.function_expr }}</small>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="alert alert-warning">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    No active masking rules found. Create some rules to see the comparison.
+</div>
+{% endif %}
+
+<!-- Data Comparison -->
+{% if comparison_data %}
+<div class="row">
+    {% for data in comparison_data %}
+    <div class="col-lg-6 mb-4">
+        <div class="comparison-card">
+            <div class="comparison-header">
+                <i class="fas fa-user me-2"></i>Customer #{{ data.customer_id }}
+            </div>
+            <div class="comparison-content">
+                <!-- Original Data -->
+                <h6 class="text-primary mb-3">
+                    <i class="fas fa-eye me-2"></i>Original Data
+                </h6>
+                {% for field, value in data.normal.items %}
+                <div class="data-field">
+                    <span class="field-label">{{ field|title }}:</span>
+                    <span class="field-value">{{ value|default:"N/A" }}</span>
+                </div>
+                {% endfor %}
+
+                <hr class="my-3">
+
+                <!-- Anonymized Data -->
+                <h6 class="text-success mb-3">
+                    <i class="fas fa-mask me-2"></i>Anonymized Data
+                </h6>
+                {% if data.anonymized.error %}
+                <div class="alert alert-danger small">
+                    <i class="fas fa-exclamation-triangle me-1"></i>{{ data.anonymized.error }}
+                </div>
+                {% else %}
+                {% for field, value in data.anonymized.items %}
+                <div class="data-field">
+                    <span class="field-label">{{ field|title }}:</span>
+                    <span class="field-value anonymized">{{ value|default:"N/A" }}</span>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>
+    No customer data available for comparison. <a href="{% url 'sample_app:create_demo_data' %}">Create demo data</a> first.
+</div>
+{% endif %}
+
+<!-- Real-time Preview Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>Real-time Anonymization Preview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Test Function:</h6>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="testFunction"
+                                   placeholder="e.g., anon.fake_email()" value="anon.fake_email()">
+                            <button class="btn btn-primary" type="button" onclick="previewFunction()">
+                                <i class="fas fa-play me-1"></i>Preview
+                            </button>
+                        </div>
+
+                        <h6>Test Data:</h6>
+                        <textarea class="form-control" id="testData" rows="6" placeholder="Enter test data (one value per line)">
+john.doe@example.com
+jane.smith@company.com
+admin@testsite.org
+user123@domain.com
+contact@business.net</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Preview Result:</h6>
+                        <div id="previewResult" class="border rounded p-3 bg-light" style="min-height: 200px;">
+                            <div class="text-muted text-center py-4">
+                                <i class="fas fa-play-circle fa-2x mb-2"></i><br>
+                                Click "Preview" to see anonymization results
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{% url 'sample_app:context_manager_demo' %}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-code me-1"></i>Context Managers
+        </a>
+        <a href="{% url 'sample_app:function_validator_demo' %}" class="btn btn-outline-success me-2">
+            <i class="fas fa-check-circle me-1"></i>Function Validator
+        </a>
+        <a href="{% url 'sample_app:anonymization_demo' %}" class="btn btn-primary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Demo
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewFunction() {
+    const func = document.getElementById('testFunction').value;
+    const data = document.getElementById('testData').value;
+    const resultDiv = document.getElementById('previewResult');
+
+    if (!func.trim()) {
+        resultDiv.innerHTML = '<div class="alert alert-warning">Please enter a function to test</div>';
+        return;
+    }
+
+    resultDiv.innerHTML = '<div class="text-center py-3"><i class="fas fa-spinner fa-spin"></i> Processing...</div>';
+
+    // Simulate anonymization preview (in a real app, this would call the backend)
+    setTimeout(() => {
+        const lines = data.split('\n').filter(line => line.trim());
+        let result = '<div class="preview-results">';
+
+        lines.forEach((line, index) => {
+            let anonymized;
+
+            // Simple simulation based on function type
+            if (func.includes('fake_email')) {
+                anonymized = `fake.email.${index}@anonymized.com`;
+            } else if (func.includes('fake_name') || func.includes('fake_first_name')) {
+                anonymized = `FakeName${index}`;
+            } else if (func.includes('hash')) {
+                anonymized = `hash_${Math.random().toString(36).substr(2, 8)}`;
+            } else if (func.includes('partial')) {
+                anonymized = line.substring(0, 2) + '***' + line.substring(line.length - 2);
+            } else {
+                anonymized = `[${func}]_result_${index}`;
+            }
+
+            result += `
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <span class="text-muted">${line}</span>
+                    <i class="fas fa-arrow-right mx-2"></i>
+                    <span class="text-success font-monospace">${anonymized}</span>
+                </div>
+            `;
+        });
+
+        result += '</div>';
+        result += `<div class="mt-3 text-muted small">
+            <i class="fas fa-info-circle me-1"></i>
+            This is a simulation. Actual results depend on PostgreSQL Anonymizer extension.
+        </div>`;
+
+        resultDiv.innerHTML = result;
+    }, 1000);
+}
+
+// Auto-preview when function changes
+document.getElementById('testFunction').addEventListener('input', function() {
+    if (this.value.trim()) {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(previewFunction, 500);
+    }
+});
+</script>
+{% endblock %}

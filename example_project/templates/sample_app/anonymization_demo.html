@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}Anonymization Demo - Django PostgreSQL Anonymizer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-mask me-2"></i>Anonymization Demo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This page demonstrates the anonymization features. You can create sample rules and see how data gets anonymized.
+                </div>
+
+                <!-- Action buttons -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="create_sample_rules">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-plus-circle me-2"></i>Create Sample Rules
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="/admin/django_postgres_anon/maskingrule/" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-cog me-2"></i>Manage Rules in Admin
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Enhanced Demo Features -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-star me-2"></i>Enhanced Demo Features
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <a href="{% url 'sample_app:context_manager_demo' %}" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-code me-2"></i>Context Managers Demo
+                                </a>
+                                <small class="text-muted d-block mt-1">Temporary anonymized data access</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <a href="{% url 'sample_app:function_validator_demo' %}" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-check-circle me-2"></i>Function Validator
+                                </a>
+                                <small class="text-muted d-block mt-1">Test and validate anonymization functions</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <a href="{% url 'sample_app:masking_comparison' %}" class="btn btn-outline-warning w-100">
+                                    <i class="fas fa-balance-scale me-2"></i>Data Comparison
+                                </a>
+                                <small class="text-muted d-block mt-1">Compare original vs anonymized data</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <a href="{% url 'sample_app:anonymized_customers' %}" class="btn btn-outline-info w-100">
+                                    <i class="fas fa-users me-2"></i>Mixin Demo
+                                </a>
+                                <small class="text-muted d-block mt-1">Class-based view with AnonymizedDataMixin</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Customer Data -->
+                {% if customers %}
+                <h6 class="mt-4">Sample Customer Data (Before Anonymization)</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>SSN</th>
+                                <th>City</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in customers %}
+                            <tr>
+                                <td>{{ customer.user.first_name }} {{ customer.user.last_name }}</td>
+                                <td>{{ customer.user.email }}</td>
+                                <td>{{ customer.phone }}</td>
+                                <td>{{ customer.ssn }}</td>
+                                <td>{{ customer.city }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <!-- Sample Order Data -->
+                {% if orders %}
+                <h6 class="mt-4">Sample Order Data</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>{{ order.customer.user.first_name }} {{ order.customer.user.last_name }}</td>
+                                <td>${{ order.total_amount }}</td>
+                                <td>{{ order.notes|truncatewords:8 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <!-- Commands Guide -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Management Commands</h6>
+                    </div>
+                    <div class="card-body">
+                        <p>Use these commands to manage anonymization:</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-check text-success me-2"></i>Validate Rules</h6>
+                                <code class="d-block mb-2">python manage.py anon_validate</code>
+
+                                <h6><i class="fas fa-play text-primary me-2"></i>Apply Rules</h6>
+                                <code class="d-block mb-2">python manage.py anon_apply</code>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-info text-info me-2"></i>Check Status</h6>
+                                <code class="d-block mb-2">python manage.py anon_status</code>
+
+                                <h6><i class="fas fa-download text-warning me-2"></i>Export Data</h6>
+                                <code class="d-block mb-2">python manage.py anon_dump output.sql</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Current Rules -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Current Masking Rules
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if masking_rules %}
+                    {% for rule in masking_rules %}
+                    <div class="border-bottom pb-2 mb-2">
+                        <h6 class="mb-1">{{ rule.table_name }}.{{ rule.column_name }}</h6>
+                        <small class="text-muted">{{ rule.function_expr }}</small>
+                        {% if rule.enabled %}
+                            <span class="badge bg-success ms-2">Enabled</span>
+                        {% else %}
+                            <span class="badge bg-secondary ms-2">Disabled</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No masking rules created yet.</p>
+                    <small>Click "Create Sample Rules" to get started.</small>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Presets -->
+        {% if presets %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-layer-group me-2"></i>Available Presets
+                </h6>
+            </div>
+            <div class="card-body">
+                {% for preset in presets %}
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                    <div>
+                        <h6 class="mb-0">{{ preset.name }}</h6>
+                        <small class="text-muted">{{ preset.rules.count }} rules</small>
+                    </div>
+                    {% if preset.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Schema Info -->
+        {% if schema_info %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-database me-2"></i>Table Schema
+                </h6>
+            </div>
+            <div class="card-body">
+                {% for table, columns in schema_info.items %}
+                <h6>{{ table }}</h6>
+                <ul class="small">
+                    {% for column in columns|slice:":5" %}
+                    <li>{{ column.column_name }} ({{ column.data_type }})</li>
+                    {% endfor %}
+                    {% if columns|length > 5 %}
+                    <li class="text-muted">... and {{ columns|length|add:"-5" }} more</li>
+                    {% endif %}
+                </ul>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

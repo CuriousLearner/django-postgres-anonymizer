@@ -1,0 +1,31 @@
+extends: relaxed
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+  indentation:
+    spaces: 2
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+  trailing-spaces: enable
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 1
+  key-duplicates: enable
+  octal-values: enable
+  quoted-strings:
+    quote-type: prefer-double
+    required: only-when-needed
+
+ignore: |
+  docker/
+  .github/
+  venv/
+  .venv/
+  node_modules/

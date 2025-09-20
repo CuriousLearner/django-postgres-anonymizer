@@ -1,0 +1,323 @@
+# Education System Anonymization Rules
+# Suitable for schools, universities, and educational platforms
+
+# Student Information
+- table: students
+  column: student_id
+  function: anon.random_string(8)
+  enabled: true
+  notes: "Student ID number"
+  depends_on_unique: true
+
+- table: students
+  column: ssn
+  function: anon.fake_ssn()
+  enabled: true
+  notes: "Student Social Security Number"
+  depends_on_unique: true
+
+- table: students
+  column: first_name
+  function: anon.fake_first_name()
+  enabled: true
+
+- table: students
+  column: last_name
+  function: anon.fake_last_name()
+  enabled: true
+
+- table: students
+  column: email
+  function: anon.fake_email()
+  enabled: true
+
+- table: students
+  column: phone
+  function: anon.fake_phone()
+  enabled: true
+
+- table: students
+  column: date_of_birth
+  function: anon.random_date_between('1985-01-01', '2010-12-31')
+  enabled: true
+
+- table: students
+  column: address
+  function: anon.fake_address()
+  enabled: true
+
+- table: students
+  column: city
+  function: anon.fake_city()
+  enabled: true
+
+- table: students
+  column: state
+  function: anon.fake_state()
+  enabled: true
+
+- table: students
+  column: zip_code
+  function: anon.fake_zipcode()
+  enabled: true
+
+- table: students
+  column: parent_guardian_name
+  function: anon.fake_name()
+  enabled: true
+
+- table: students
+  column: parent_guardian_phone
+  function: anon.fake_phone()
+  enabled: true
+
+- table: students
+  column: parent_guardian_email
+  function: anon.fake_email()
+  enabled: true
+
+- table: students
+  column: emergency_contact_name
+  function: anon.fake_name()
+  enabled: true
+
+- table: students
+  column: emergency_contact_phone
+  function: anon.fake_phone()
+  enabled: true
+
+# Faculty/Staff Information
+- table: faculty
+  column: employee_id
+  function: anon.random_string(6)
+  enabled: true
+  depends_on_unique: true
+
+- table: faculty
+  column: ssn
+  function: anon.fake_ssn()
+  enabled: true
+  depends_on_unique: true
+
+- table: faculty
+  column: first_name
+  function: anon.fake_first_name()
+  enabled: true
+
+- table: faculty
+  column: last_name
+  function: anon.fake_last_name()
+  enabled: true
+
+- table: faculty
+  column: email
+  function: anon.fake_email()
+  enabled: true
+
+- table: faculty
+  column: phone
+  function: anon.fake_phone()
+  enabled: true
+
+- table: faculty
+  column: office_location
+  function: anon.fake_office_number()
+  enabled: true
+
+- table: faculty
+  column: home_address
+  function: anon.fake_address()
+  enabled: true
+
+# Courses
+- table: courses
+  column: course_description
+  function: anon.lorem_ipsum()
+  enabled: false
+  notes: "Disabled - may need to preserve course content"
+
+- table: courses
+  column: instructor_notes
+  function: anon.lorem_ipsum()
+  enabled: true
+
+# Enrollments (be careful with grades)
+- table: enrollments
+  column: grade
+  function: anon.noise({col}, 0.05)
+  enabled: false
+  notes: "Disabled - adds 5% noise to grades, review impact"
+  performance_heavy: true
+
+- table: enrollments
+  column: comments
+  function: anon.lorem_ipsum()
+  enabled: true
+
+# Assignments
+- table: assignments
+  column: student_response
+  function: anon.lorem_ipsum()
+  enabled: true
+  notes: "Student assignment responses"
+
+- table: assignments
+  column: instructor_feedback
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: assignments
+  column: score
+  function: anon.noise({col}, 0.02)
+  enabled: false
+  notes: "Disabled - adds 2% noise to scores"
+
+# Tests/Exams
+- table: exam_results
+  column: score
+  function: anon.noise({col}, 0.03)
+  enabled: false
+  notes: "Disabled - adds 3% noise to exam scores"
+
+- table: exam_results
+  column: essay_response
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: exam_results
+  column: proctor_notes
+  function: anon.lorem_ipsum()
+  enabled: true
+
+# Library System
+- table: library_checkouts
+  column: checkout_notes
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: library_fines
+  column: notes
+  function: anon.lorem_ipsum()
+  enabled: true
+
+# Financial Aid
+- table: financial_aid
+  column: family_income
+  function: anon.noise({col}, 0.15)
+  enabled: false
+  notes: "Disabled - adds 15% noise to income data"
+
+- table: financial_aid
+  column: fafsa_id
+  function: anon.random_string(10)
+  enabled: true
+  depends_on_unique: true
+
+- table: financial_aid
+  column: parent_ssn
+  function: anon.fake_ssn()
+  enabled: true
+  depends_on_unique: true
+
+# Disciplinary Records
+- table: disciplinary_records
+  column: incident_description
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: disciplinary_records
+  column: action_taken
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: disciplinary_records
+  column: witness_statement
+  function: anon.lorem_ipsum()
+  enabled: true
+
+# Counseling/Support Services
+- table: counseling_sessions
+  column: session_notes
+  function: anon.lorem_ipsum()
+  enabled: true
+  notes: "Sensitive counseling notes"
+
+- table: counseling_sessions
+  column: student_concerns
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: counseling_sessions
+  column: counselor_observations
+  function: anon.lorem_ipsum()
+  enabled: true
+
+# Health Records (if maintained by school)
+- table: health_records
+  column: medical_notes
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: health_records
+  column: medications
+  function: anon.lorem_ipsum()
+  enabled: true
+
+- table: health_records
+  column: allergies
+  function: anon.lorem_ipsum()
+  enabled: false
+  notes: "Disabled - may be needed for safety"
+
+- table: health_records
+  column: emergency_medical_contact
+  function: anon.fake_name()
+  enabled: true
+
+- table: health_records
+  column: emergency_medical_phone
+  function: anon.fake_phone()
+  enabled: true
+
+# Alumni Records
+- table: alumni
+  column: current_employer
+  function: anon.fake_company()
+  enabled: true
+
+- table: alumni
+  column: current_position
+  function: anon.fake_job_title()
+  enabled: true
+
+- table: alumni
+  column: current_address
+  function: anon.fake_address()
+  enabled: true
+
+- table: alumni
+  column: current_phone
+  function: anon.fake_phone()
+  enabled: true
+
+- table: alumni
+  column: current_email
+  function: anon.fake_email()
+  enabled: true
+
+# Research Data (if applicable)
+- table: research_participants
+  column: participant_id
+  function: anon.random_string(8)
+  enabled: true
+  depends_on_unique: true
+
+- table: research_participants
+  column: consent_form_signature
+  function: anon.fake_signature()
+  enabled: true
+
+- table: research_participants
+  column: interview_notes
+  function: anon.lorem_ipsum()
+  enabled: true
