@@ -89,12 +89,10 @@ jobs:
         DJANGO_SETTINGS_MODULE: tests.settings
       run: |
         # Run all tests with PostgreSQL anonymizer extension available
-        coverage run --source='django_postgres_anon' -m pytest tests/ -v
-        coverage report
-        coverage xml
+        pytest tests/ -v --cov=django_postgres_anon --cov-report=xml --cov-report=term-missing --cov-fail-under=87
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
