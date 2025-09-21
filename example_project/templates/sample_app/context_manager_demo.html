@@ -58,7 +58,9 @@
             </div>
             <div class="card-body">
                 <p class="small text-muted">Using <code>anonymized_data()</code> context manager:</p>
-                <pre class="bg-light p-2 rounded"><code>with anonymized_data():
+                <pre class="bg-light p-2 rounded"><code>from django_postgres_anon.context_managers import anonymized_data
+
+with anonymized_data():
     User.objects.values('username', 'email')[:5]</code></pre>
 
                 <div class="mt-3">
@@ -92,7 +94,9 @@
             </div>
             <div class="card-body">
                 <p class="small text-muted">Using <code>database_role()</code> context manager:</p>
-                <pre class="bg-light p-2 rounded"><code>with database_role('masked_reader'):
+                <pre class="bg-light p-2 rounded"><code>from django_postgres_anon.context_managers import database_role
+
+with database_role('masked_reader'):
     User.objects.values('username', 'email')[:5]</code></pre>
 
                 <div class="mt-3">
@@ -112,6 +116,36 @@
                     <div class="text-muted">No data available</div>
                     {% endfor %}
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Copy-Paste Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-copy me-2"></i>Quick Start - Copy & Paste Ready
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Ready to use this in your project? Copy and paste this code:</p>
+                <pre class="bg-light p-3 rounded"><code># Import the context managers
+from django_postgres_anon.context_managers import anonymized_data, database_role
+
+# Basic usage in your views
+def my_view(request):
+    # Get anonymized data
+    with anonymized_data():
+        users = User.objects.all()
+
+    # Or use specific role
+    with database_role('masked_reader'):
+        customers = Customer.objects.all()
+
+    return render(request, 'template.html', {'users': users})</code></pre>
             </div>
         </div>
     </div>

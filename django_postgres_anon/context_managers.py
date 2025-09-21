@@ -81,13 +81,13 @@ def _capture_transaction_state() -> Optional[str]:
 
 def _setup_masked_role(role_name: str, auto_create: bool) -> bool:
     """Switch to masked role and handle auto-creation."""
+    # Update database records BEFORE switching roles (while we still have permissions)
+    if auto_create:
+        _update_masked_role_record(role_name)
+
     # Switch to the masked role
     if not switch_to_role(role_name, auto_create=auto_create):
         raise RuntimeError(f"Failed to switch to masked role: {role_name}")
-
-    # Update database records if auto-created
-    if auto_create:
-        _update_masked_role_record(role_name)
 
     # Verify the switch was successful
     _verify_role_switch(role_name)
@@ -97,13 +97,24 @@ def _setup_masked_role(role_name: str, auto_create: bool) -> bool:
 
 def _update_masked_role_record(role_name: str) -> None:
     """Create or update MaskedRole record for tracking."""
-    masked_role, created = MaskedRole.objects.get_or_create(
-        role_name=role_name,
-        defaults={"is_applied": True, "description": "Auto-created role for anonymized data access"},
-    )
-    if not created:
-        masked_role.is_applied = True
-        masked_role.save()
+    try:
+        # First check if record already exists and is applied
+        existing_role = MaskedRole.objects.filter(role_name=role_name, is_applied=True).first()
+        if existing_role:
+            # Already exists and applied, no need to update
+            return
+
+        # Create or update the record
+        masked_role, created = MaskedRole.objects.get_or_create(
+            role_name=role_name,
+            defaults={"is_applied": True, "description": "Auto-created role for anonymized data access"},
+        )
+        if not created and not masked_role.is_applied:
+            masked_role.is_applied = True
+            masked_role.save()
+    except Exception as e:
+        # Don't fail if we can't update the record - the role switching is more important
+        logger.warning(f"Failed to update MaskedRole record for {role_name}: {e}")
 
 
 def _verify_role_switch(role_name: str) -> None:
