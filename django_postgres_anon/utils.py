@@ -98,22 +98,79 @@ def create_masked_role(role_name, inherit_from=None):
         with connection.cursor() as cursor:
             # Check if role already exists
             cursor.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", [role_name])
-            if cursor.fetchone():
-                logger.debug(f"Role {role_name} already exists")
-                return True
+            role_exists = cursor.fetchone() is not None
 
-            # Create role with LOGIN capability
-            cursor.execute(f"CREATE ROLE {connection.ops.quote_name(role_name)} WITH LOGIN INHERIT")
+            if not role_exists:
+                # Create role with LOGIN capability
+                cursor.execute(f"CREATE ROLE {connection.ops.quote_name(role_name)} WITH LOGIN INHERIT")
 
-            # Grant inheritance from a base role if specified and it exists
-            if inherit_from:
-                cursor.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", [inherit_from])
-                if cursor.fetchone():
+                # Grant inheritance from a base role if specified and it exists
+                if inherit_from:
+                    cursor.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", [inherit_from])
+                    if cursor.fetchone():
+                        cursor.execute(
+                            f"GRANT {connection.ops.quote_name(inherit_from)} TO {connection.ops.quote_name(role_name)}"
+                        )
+                    else:
+                        logger.debug(f"Base role {inherit_from} does not exist, skipping inheritance")
+
+            # Always ensure the role has proper permissions to django_postgres_anon tables
+            # This is needed for the role to access the app's models even when switching contexts
+            django_postgres_anon_tables = [
+                'django_postgres_anon_maskingrule',
+                'django_postgres_anon_maskingpreset',
+                'django_postgres_anon_maskingpreset_rules',
+                'django_postgres_anon_maskedrole',
+                'django_postgres_anon_maskinglog'
+            ]
+
+            for table in django_postgres_anon_tables:
+                try:
+                    # Check if table exists first
                     cursor.execute(
-                        f"GRANT {connection.ops.quote_name(inherit_from)} TO {connection.ops.quote_name(role_name)}"
+                        "SELECT 1 FROM information_schema.tables WHERE table_name = %s",
+                        [table]
                     )
-                else:
-                    logger.debug(f"Base role {inherit_from} does not exist, skipping inheritance")
+                    if cursor.fetchone():
+                        # Grant SELECT permissions on django_postgres_anon tables
+                        cursor.execute(
+                            f"GRANT SELECT ON TABLE {connection.ops.quote_name(table)} TO {connection.ops.quote_name(role_name)}"
+                        )
+
+                        # For the MaskedRole table, also grant INSERT and UPDATE permissions
+                        # so roles can update their own status
+                        if table == 'django_postgres_anon_maskedrole':
+                            try:
+                                cursor.execute(
+                                    f"GRANT INSERT, UPDATE ON TABLE {connection.ops.quote_name(table)} TO {connection.ops.quote_name(role_name)}"
+                                )
+                                # Also grant usage on the sequence for auto-increment ID
+                                cursor.execute(
+                                    f"GRANT USAGE ON SEQUENCE {connection.ops.quote_name(table + '_id_seq')} TO {connection.ops.quote_name(role_name)}"
+                                )
+                                logger.debug(f"Granted INSERT, UPDATE, and USAGE on sequence for {table} to {role_name}")
+                            except Exception as write_error:
+                                logger.warning(f"Failed to grant write permissions on {table}: {write_error}")
+
+                        logger.debug(f"Granted SELECT on {table} to {role_name}")
+                    else:
+                        logger.debug(f"Table {table} does not exist, skipping permission grant")
+                except Exception as table_error:
+                    logger.warning(f"Failed to grant permissions on {table} to {role_name}: {table_error}")
+
+            # Grant CONNECT permission on database
+            try:
+                cursor.execute(f"GRANT CONNECT ON DATABASE {connection.ops.quote_name(connection.settings_dict['NAME'])} TO {connection.ops.quote_name(role_name)}")
+                logger.debug(f"Granted CONNECT on database to {role_name}")
+            except Exception as db_error:
+                logger.warning(f"Failed to grant CONNECT permission: {db_error}")
+
+            # Grant USAGE on schema
+            try:
+                cursor.execute(f"GRANT USAGE ON SCHEMA public TO {connection.ops.quote_name(role_name)}")
+                logger.debug(f"Granted USAGE on schema public to {role_name}")
+            except Exception as schema_error:
+                logger.warning(f"Failed to grant USAGE on schema: {schema_error}")
 
             return True
     except Exception as e:
@@ -314,6 +371,12 @@ def switch_to_role(role_name: str, auto_create: bool = True):
     try:
         with connection.cursor() as cursor:
             cursor.execute(f"SET ROLE {role_name}")
+
+            # For masked roles, also set the search path to prioritize mask schema
+            if 'mask' in role_name.lower():
+                cursor.execute("SET search_path = mask, public")
+                logger.debug(f"Set search_path to 'mask, public' for role {role_name}")
+
             return True
     except Exception as e:
         logger.debug(f"Failed to switch to role {role_name}: {e}")

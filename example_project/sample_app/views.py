@@ -87,13 +87,23 @@ def create_demo_data(request: HttpRequest) -> HttpResponse:
                     messages.warning(request, "Demo data already exists. Skipping creation.")
                     return render(request, "sample_app/create_demo_data.html")
 
+                # Realistic demo names
+                demo_names = [
+                    ("John", "Smith"), ("Sarah", "Johnson"), ("Michael", "Williams"), ("Emily", "Brown"),
+                    ("David", "Jones"), ("Jessica", "Garcia"), ("Christopher", "Miller"), ("Ashley", "Davis"),
+                    ("Matthew", "Rodriguez"), ("Amanda", "Martinez"), ("Daniel", "Hernandez"), ("Jennifer", "Lopez"),
+                    ("Joshua", "Anderson"), ("Michelle", "Taylor"), ("Andrew", "Thomas"), ("Stephanie", "Jackson"),
+                    ("James", "White"), ("Nicole", "Harris"), ("Ryan", "Martin"), ("Elizabeth", "Thompson")
+                ]
+
                 # Create demo users and customers
                 for i in range(10):
+                    first_name, last_name = demo_names[i]
                     user = User.objects.create_user(
                         username=f"demo_user_{i}",
-                        email=f"user{i}@example.com",
-                        first_name=f"FirstName{i}",
-                        last_name=f"LastName{i}",
+                        email=f"{first_name.lower()}.{last_name.lower()}@example.com",
+                        first_name=first_name,
+                        last_name=last_name,
                     )
 
                     customer = Customer.objects.create(

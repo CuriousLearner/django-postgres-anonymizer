@@ -99,7 +99,7 @@ POSTGRES_ANON = {'MASKED_GROUP': 'analysts'}
 
 ### 🛠️ **Developer Experience**
 
-- ⚙️ **7 Management Commands** - Complete CLI toolkit for all anonymization operations
+- ⚙️ **8 Management Commands** - Complete CLI toolkit for all anonymization operations
 - 🖥️ **Rich Admin Interface** - Full Django admin with batch operations and real-time validation
 - 🔍 **Schema Introspection** - Automatic table/column discovery and constraint detection
 - 📋 **Function Validation** - Real-time SQL syntax checking and security validation
@@ -751,6 +751,9 @@ python manage.py anon_status [-v 2]               # Show status
 python manage.py anon_load_yaml <preset_or_file>  # Load rules
 python manage.py anon_validate                    # Validate rules
 python manage.py anon_dump <output.sql>           # Create anonymized dump
+
+# Utilities
+python manage.py anon_fix_permissions [--role name | --all]  # Fix role permissions
 ```
 
 ### Configuration Settings
@@ -858,6 +861,41 @@ Performance tuning options are not yet implemented. Future versions may include 
 3. **Audit Logging**: All operations are logged for compliance and monitoring
 4. **Parameterized Queries**: All database operations use parameterized queries
 5. **Permission Checks**: Proper Django permissions for all admin actions
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### Permission Denied Errors
+
+If you encounter `permission denied for table django_postgres_anon_maskedrole` or similar errors:
+
+```bash
+# Fix permissions for all masked roles
+python manage.py anon_fix_permissions --all
+
+# Or fix a specific role
+python manage.py anon_fix_permissions --role masked_reader
+```
+
+This command grants necessary permissions for masked roles to access django_postgres_anon metadata tables.
+
+#### Anonymization Not Working
+
+If anonymized data looks the same as original data:
+
+1. **Check extension status**: `python manage.py anon_status`
+2. **Apply rules**: `python manage.py anon_apply`
+3. **Verify masked views**: Check that views exist in the `mask` schema
+4. **Fix role permissions**: `python manage.py anon_fix_permissions --all`
+
+#### Function Validation Errors
+
+When applying rules, if you see function validation errors:
+
+1. **Check available functions**: Verify the function exists in your PostgreSQL Anonymizer installation
+2. **Use alternatives**: Replace unsupported functions with available ones (e.g., `anon.hash()` instead of `anon.fake_ssn()`)
+3. **Validate syntax**: Use `python manage.py anon_validate` to check all rules
 
 ## 🤝 Contributing
 

@@ -194,11 +194,11 @@ def masking_comparison_view(request: HttpRequest) -> HttpResponse:
     context = {"comparison_data": [], "active_rules": []}
 
     try:
-        # Get active masking rules
+        # Get active masking rules (before switching to masked role)
         active_rules = MaskingRule.objects.filter(enabled=True)
         context["active_rules"] = active_rules
 
-        # Get sample data for comparison
+        # Get sample data for comparison (before switching to masked role)
         sample_customers = Customer.objects.select_related("user")[:3]
 
         for customer in sample_customers:
