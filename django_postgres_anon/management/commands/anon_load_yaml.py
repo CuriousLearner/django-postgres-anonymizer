@@ -2,9 +2,8 @@ import logging
 import os
 from pathlib import Path
 
-from django.core.management.base import BaseCommand, CommandError
-
 import yaml
+from django.core.management.base import BaseCommand, CommandError
 
 from django_postgres_anon.models import MaskingPreset, MaskingRule
 from django_postgres_anon.utils import create_operation_log, validate_function_syntax

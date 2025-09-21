@@ -8,10 +8,9 @@ They test the full workflow from initialization to anonymization.
 import os
 import tempfile
 
+import pytest
 from django.contrib.auth.models import User
 from django.core.management import call_command
-
-import pytest
 
 from django_postgres_anon.models import MaskingLog, MaskingPreset, MaskingRule
 

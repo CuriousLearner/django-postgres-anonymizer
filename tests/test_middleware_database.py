@@ -4,11 +4,10 @@ Tests for AnonRoleMiddleware database role switching functionality
 
 from unittest.mock import Mock, patch
 
+import pytest
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponse
 from django.test import RequestFactory
-
-import pytest
 
 from django_postgres_anon.middleware import AnonRoleMiddleware
 

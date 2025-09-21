@@ -292,6 +292,6 @@ class Command(BaseCommand):
                 self.stdout.write(f"  • {error}")
 
         if not any([removed_labels, removed_rules, removed_presets, removed_roles]):
-            self.stdout.write(self.style.WARNING("ℹ️ Nothing to remove"))
+            self.stdout.write(self.style.WARNING("Nothing to remove"))
         elif not options["dry_run"]:
             self.stdout.write(self.style.SUCCESS("\n🧹 Anonymization removal completed!"))

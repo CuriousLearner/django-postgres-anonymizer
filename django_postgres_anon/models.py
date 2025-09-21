@@ -1,10 +1,12 @@
+import logging
 import os
 from typing import Optional
 
-from django.db import models
-from django.utils import timezone
-
 import yaml
+from django.db import connection, models
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
+from django.utils import timezone
 
 
 class MaskingRule(models.Model):
@@ -107,7 +109,7 @@ class MaskingPreset(models.Model):
         if not preset_name:
             preset_name = os.path.splitext(os.path.basename(yaml_path))[0]
 
-        preset, created = cls.objects.get_or_create(
+        preset, _created = cls.objects.get_or_create(
             name=preset_name, defaults={"description": f"Loaded from {yaml_path}"}
         )
 
@@ -157,14 +159,6 @@ class MaskingLog(models.Model):
         status = "✅" if self.success else "❌"
         return f"{status} {self.get_operation_display()} - {self.timestamp}"
 
-
-import logging
-
-from django.db import connection
-
-# Signal handlers for automatic security label management
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
 
 logger = logging.getLogger(__name__)
 
