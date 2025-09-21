@@ -1,8 +1,7 @@
 """Comprehensive tests for core functionality: models, config, and exceptions"""
 
-from django.core.exceptions import ValidationError
-
 import pytest
+from django.core.exceptions import ValidationError
 from model_bakery import baker
 
 from django_postgres_anon.config import anon_config
@@ -206,7 +205,7 @@ class TestMaskingPresetBehavior:
 
         try:
             # Don't provide preset_name - should use filename
-            preset, rules_created = MaskingPreset.load_from_yaml(yaml_path)
+            preset, _rules_created = MaskingPreset.load_from_yaml(yaml_path)
 
             # Should use the filename (without extension) as preset name
             expected_name = os.path.splitext(os.path.basename(yaml_path))[0]

@@ -286,19 +286,25 @@ select = [
     "PERF", # performance anti-patterns
 ]
 ignore = [
-    "E501",   # line too long (handled by formatter)
-    "B008",   # do not perform function calls in argument defaults
-    "B904",   # raise from
-    "S101",   # assert used (needed for tests)
-    "S105",   # hardcoded password (false positives in tests)
-    "S106",   # hardcoded password (false positives in tests)
-    "SIM105", # contextlib.suppress
+    "E501",    # line too long (handled by formatter)
+    "B008",    # do not perform function calls in argument defaults
+    "B904",    # raise from
+    "S101",    # assert used (needed for tests)
+    "S105",    # hardcoded password (false positives in tests)
+    "S106",    # hardcoded password (false positives in tests)
+    "SIM105",  # contextlib.suppress
     "PLR0913", # too many arguments
     "PLR2004", # magic value comparison
     "PLR0912", # too many branches
     "PERF203", # try-except in loop
     "SIM102",  # use single if statement
     "SIM103",  # return condition directly
+    "PLC0415", # import at top-level (needed for lazy imports)
+    "S603",    # subprocess call checks (we control the inputs)
+    "S110",    # try-except-pass (sometimes needed for optional features)
+    "RUF012",  # mutable class attributes (Django Meta classes)
+    "RUF043",  # regex patterns in tests are fine
+    "SIM117",  # nested with statements (sometimes clearer)
 ]
 
 [tool.ruff.lint.per-file-ignores]

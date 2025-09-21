@@ -11,51 +11,56 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-        django-version: ['3.2', '4.0', '4.1', '4.2']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+        django-version: ['3.2', '4.1', '4.2', '5.0']
         exclude:
-          - python-version: '3.8'
-            django-version: '4.0'
-          - python-version: '3.8'
-            django-version: '4.1'
-          - python-version: '3.8'
-            django-version: '4.2'
+          # Django 5.0 requires Python 3.10+
+          - python-version: '3.9'
+            django-version: '5.0'
 
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
+    # We'll use a custom setup approach instead of services
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install PostgreSQL Anonymizer Extension
+    - name: Setup PostgreSQL with Anonymizer Extension
       run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client
-        # Install postgresql_anonymizer extension
-        sudo apt-get install -y postgresql-13-postgresql-anonymizer || echo "Extension not available in apt, will build from source"
+        # Pull the official PostgreSQL Anonymizer Docker image
+        docker pull registry.gitlab.com/dalibo/postgresql_anonymizer:stable
+
+        # Run the PostgreSQL container with anonymizer extension
+        docker run -d \
+          --name postgres-anon \
+          -e POSTGRES_PASSWORD=postgres \
+          -e POSTGRES_USER=postgres \
+          -e POSTGRES_DB=test_db \
+          -p 5432:5432 \
+          registry.gitlab.com/dalibo/postgresql_anonymizer:stable
+
+        # Wait for PostgreSQL to be ready (with timeout)
+        echo "Waiting for PostgreSQL to be ready..."
+        for i in {1..30}; do
+          if docker exec postgres-anon pg_isready -U postgres; then
+            echo "PostgreSQL is ready!"
+            break
+          fi
+          echo "Attempt $i/30: PostgreSQL not ready yet, waiting..."
+          sleep 2
+        done
+
+        # Final check
+        docker exec postgres-anon pg_isready -U postgres
 
     - name: Cache pip dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/setup.py') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/pyproject.toml') }}
         restore-keys: |
           ${{ runner.os }}-pip-
 
@@ -69,20 +74,27 @@ jobs:
 
     - name: Setup test database
       run: |
-        export PGPASSWORD=postgres
-        psql -h localhost -U postgres -d test_db -c "CREATE EXTENSION IF NOT EXISTS anon CASCADE;"
+        # Install PostgreSQL client for local psql commands
+        sudo apt-get update && sudo apt-get install -y postgresql-client
+
+        # Create the anonymizer extension
+        PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "CREATE EXTENSION IF NOT EXISTS anon CASCADE;"
+
+        # Verify extension was created
+        PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "SELECT name, installed_version FROM pg_available_extensions WHERE name = 'anon';"
 
     - name: Run tests
       env:
         DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+        DJANGO_SETTINGS_MODULE: tests.settings
       run: |
-        coverage run --source='.' -m pytest tests/ -v
-        coverage report
-        coverage xml
+        # Run all tests with PostgreSQL anonymizer extension available
+        pytest tests/ -v --cov=django_postgres_anon --cov-report=xml --cov-report=term-missing --cov-fail-under=87
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
@@ -91,45 +103,39 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 black isort mypy
-        pip install -e .
+        pip install -e ".[dev]"
 
-    - name: Run black
-      run: black --check .
+    - name: Run ruff format check (replaces black)
+      run: ruff format --check .
 
-    - name: Run isort
-      run: isort --check-only .
-
-    - name: Run flake8
-      run: flake8 django_postgres_anon tests
-
-    - name: Run mypy
-      run: mypy django_postgres_anon --ignore-missing-imports
+    - name: Run ruff lint check (replaces flake8, isort, etc.)
+      run: ruff check django_postgres_anon tests
 
   security:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install bandit safety
+        pip install -e .
 
     - name: Run bandit
       run: bandit -r django_postgres_anon/

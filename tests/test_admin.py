@@ -1,16 +1,18 @@
 """Behavior-focused functional tests for admin interface functionality"""
 
+from unittest.mock import MagicMock, patch
+
+import pytest
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import RequestFactory
-
-import pytest
 from model_bakery import baker
 
 from django_postgres_anon.admin import MaskingRuleAdmin
-from django_postgres_anon.models import MaskingRule
+from django_postgres_anon.admin_base import BaseAnonymizationAdmin, BaseLogAdmin
+from django_postgres_anon.models import MaskingLog, MaskingRule
 
 
 @pytest.fixture
@@ -32,7 +34,7 @@ def add_messages_to_request(request):
 @pytest.mark.django_db
 def test_admin_shows_correct_status_for_enabled_rules(admin_setup):
     """Admin should show clear status indicators for enabled rules"""
-    factory, admin, user = admin_setup
+    _factory, admin, _user = admin_setup
 
     enabled_rule = baker.make(MaskingRule, enabled=True)
     status_display = admin.enabled_status(enabled_rule)
@@ -44,7 +46,7 @@ def test_admin_shows_correct_status_for_enabled_rules(admin_setup):
 @pytest.mark.django_db
 def test_admin_shows_correct_status_for_disabled_rules(admin_setup):
     """Admin should show clear status indicators for disabled rules"""
-    factory, admin, user = admin_setup
+    _factory, admin, _user = admin_setup
 
     disabled_rule = baker.make(MaskingRule, enabled=False)
     status_display = admin.enabled_status(disabled_rule)
@@ -56,7 +58,7 @@ def test_admin_shows_correct_status_for_disabled_rules(admin_setup):
 @pytest.mark.django_db
 def test_admin_shows_applied_status_for_active_rules(admin_setup):
     """Admin should distinguish between applied and ready-to-apply rules"""
-    factory, admin, user = admin_setup
+    _factory, admin, _user = admin_setup
 
     # Applied rule
     applied_rule = baker.make(MaskingRule, enabled=True)
@@ -77,7 +79,7 @@ def test_admin_shows_applied_status_for_active_rules(admin_setup):
 @pytest.mark.django_db
 def test_admin_shows_appropriate_status_for_inactive_rules(admin_setup):
     """Admin should show appropriate status for inactive/disabled rules"""
-    factory, admin, user = admin_setup
+    _factory, admin, _user = admin_setup
 
     disabled_rule = baker.make(MaskingRule, enabled=False)
     status_display = admin.applied_status(disabled_rule)
@@ -185,7 +187,7 @@ def test_apply_action_warns_about_large_operations(admin_setup):
 @pytest.mark.django_db
 def test_admin_displays_essential_rule_information(admin_setup):
     """Admin list view should display essential rule information"""
-    factory, admin, user = admin_setup
+    _factory, admin, _user = admin_setup
 
     essential_fields = ["table_name", "column_name", "function_expr", "enabled_status", "applied_status", "created_at"]
 
@@ -196,7 +198,7 @@ def test_admin_displays_essential_rule_information(admin_setup):
 @pytest.mark.django_db
 def test_admin_provides_useful_filtering_options(admin_setup):
     """Admin should provide filtering options for common use cases"""
-    factory, admin, user = admin_setup
+    _factory, admin, _user = admin_setup
 
     useful_filters = ["enabled", "table_name", "depends_on_unique", "performance_heavy"]
 
@@ -207,7 +209,7 @@ def test_admin_provides_useful_filtering_options(admin_setup):
 @pytest.mark.django_db
 def test_admin_enables_searching_by_key_fields(admin_setup):
     """Admin should enable searching by key fields like table, column, and function"""
-    factory, admin, user = admin_setup
+    _factory, admin, _user = admin_setup
 
     searchable_fields = ["table_name", "column_name", "function_expr"]
 
@@ -218,7 +220,7 @@ def test_admin_enables_searching_by_key_fields(admin_setup):
 @pytest.mark.django_db
 def test_admin_protects_readonly_fields(admin_setup):
     """Admin should protect timestamp fields from editing"""
-    factory, admin, user = admin_setup
+    _factory, admin, _user = admin_setup
 
     protected_fields = ["applied_at", "created_at", "updated_at"]
 
@@ -229,7 +231,7 @@ def test_admin_protects_readonly_fields(admin_setup):
 @pytest.mark.django_db
 def test_admin_provides_essential_actions(admin_setup):
     """Admin should provide essential actions for rule management"""
-    factory, admin, user = admin_setup
+    _factory, admin, _user = admin_setup
 
     action_names = [action.__name__ if hasattr(action, "__name__") else str(action) for action in admin.actions]
 
@@ -362,10 +364,6 @@ def test_admin_changelist_view_functions_correctly(admin_setup):
 
 
 # Additional tests for admin_base.py coverage
-from unittest.mock import MagicMock, patch
-
-from django_postgres_anon.admin_base import BaseAnonymizationAdmin, BaseLogAdmin
-from django_postgres_anon.models import MaskingLog
 
 
 @pytest.mark.django_db
@@ -781,9 +779,7 @@ def test_base_admin_transaction_batch_error_rollback():
     admin = BaseAnonymizationAdmin(MaskingRule, AdminSite())
 
     # Create multiple rules to test error accumulation
-    rules = []
-    for i in range(15):  # More than MAX_ERRORS_BEFORE_ROLLBACK (10)
-        rules.append(baker.make(MaskingRule))
+    rules = [baker.make(MaskingRule) for _ in range(15)]  # More than MAX_ERRORS_BEFORE_ROLLBACK (10)
 
     queryset = MaskingRule.objects.filter(id__in=[r.id for r in rules])
 

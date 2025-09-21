@@ -5,11 +5,10 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
-from django.core.management import call_command
-from django.core.management.base import CommandError
-
 import pytest
 import yaml
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from model_bakery import baker
 
 from django_postgres_anon.models import MaskedRole, MaskingLog, MaskingPreset, MaskingRule
@@ -574,7 +573,7 @@ def test_anon_drop_interactive_confirmation_accepted(mock_input):
         output = call_command_with_output("anon_drop", "--table", "auth_user")
         assert "removal" in output.lower()
         # Verify mock was used
-        assert mock_input.called or True  # Mock may or may not be called depending on implementation
+        assert True  # Mock may or may not be called depending on implementation
 
     except CommandError as e:
         # May fail due to missing extension

@@ -30,8 +30,8 @@ class TestSignalCoverage(TestCase):
 
         # Should handle DoesNotExist exception (covers lines 178-180)
         assert hasattr(rule, "_enabled_changed")
-        assert rule._enabled_changed == False
-        assert rule._was_enabled == False
+        assert not rule._enabled_changed
+        assert not rule._was_enabled
 
     def test_handle_rule_disabled_enable_operation(self):
         """Test post_save signal for enable operation - covers line 194"""

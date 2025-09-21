@@ -38,7 +38,6 @@ def django_db_setup(django_db_setup):
 def user():
     """Create a regular test user"""
     from django.contrib.auth.models import User
-
     from model_bakery import baker
 
     return baker.make(User, email="user@example.com")
@@ -48,7 +47,6 @@ def user():
 def admin_user():
     """Create an admin user"""
     from django.contrib.auth.models import User
-
     from model_bakery import baker
 
     return baker.make(User, is_superuser=True, is_staff=True, email="admin@example.com")
@@ -58,7 +56,6 @@ def admin_user():
 def masked_user():
     """Create a user in the masked data group"""
     from django.contrib.auth.models import Group, User
-
     from model_bakery import baker
 
     user = baker.make(User, email="masked@example.com")
@@ -71,7 +68,6 @@ def masked_user():
 def staff_user():
     """Create a staff user"""
     from django.contrib.auth.models import User
-
     from model_bakery import baker
 
     return baker.make(User, is_staff=True, email="staff@example.com")

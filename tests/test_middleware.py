@@ -4,11 +4,10 @@ Comprehensive tests for AnonRoleMiddleware focusing on request/response behavior
 
 from unittest.mock import Mock
 
+import pytest
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponse
 from django.test import RequestFactory, override_settings
-
-import pytest
 
 from django_postgres_anon.middleware import AnonRoleMiddleware
 

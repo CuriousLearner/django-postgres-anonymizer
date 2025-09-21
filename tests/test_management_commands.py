@@ -7,12 +7,11 @@ import tempfile
 from io import StringIO
 from pathlib import Path
 
+import pytest
+import yaml
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.management.base import CommandError
-
-import pytest
-import yaml
 from model_bakery import baker
 
 from django_postgres_anon.models import MaskedRole, MaskingLog, MaskingPreset, MaskingRule

@@ -6,8 +6,6 @@ from django.db import connection
 
 from django_postgres_anon.constants import DEFAULT_POSTGRES_PORT
 
-# from django_postgres_anon.exceptions import AnonDatabaseError, AnonValidationError
-
 logger = logging.getLogger(__name__)
 
 

@@ -1,11 +1,10 @@
 """Tests for edge cases and boundary conditions"""
 
+import pytest
 from django.contrib.auth.models import User
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.exceptions import ValidationError
 from django.test import RequestFactory
-
-import pytest
 from model_bakery import baker
 
 from django_postgres_anon.models import MaskingLog, MaskingPreset, MaskingRule

@@ -7,13 +7,12 @@ to verify middleware behavior with real database role switching.
 
 from unittest.mock import Mock
 
+import pytest
 from django.contrib.auth.models import Group, User
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.http import HttpResponse
 from django.test import RequestFactory, override_settings
-
-import pytest
 
 from django_postgres_anon.middleware import AnonRoleMiddleware
 

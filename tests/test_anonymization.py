@@ -2,9 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
-from django.test import TestCase
-
 import pytest
+from django.test import TestCase
 
 from django_postgres_anon.context_managers import anonymized_data, database_role
 from django_postgres_anon.decorators import AnonymizedDataMixin, database_role_required, use_anonymized_data
