@@ -30,42 +30,31 @@ jobs:
 
     - name: Setup PostgreSQL with Anonymizer Extension
       run: |
-        # Create a Dockerfile for PostgreSQL with anonymizer extension
-        cat > Dockerfile.postgres << 'EOF'
-        FROM postgres:15
+        # Pull the official PostgreSQL Anonymizer Docker image
+        docker pull registry.gitlab.com/dalibo/postgresql_anonymizer:stable
 
-        # Install build dependencies
-        RUN apt-get update && apt-get install -y \
-            git \
-            make \
-            gcc \
-            postgresql-server-dev-15 \
-            && rm -rf /var/lib/apt/lists/*
-
-        # Clone and build postgresql_anonymizer
-        RUN git clone https://github.com/PostgreSQL-Anonymizer/postgresql_anonymizer.git /tmp/postgresql_anonymizer
-        WORKDIR /tmp/postgresql_anonymizer
-        RUN make && make install
-
-        # Cleanup
-        RUN apt-get remove -y git make gcc postgresql-server-dev-15 && apt-get autoremove -y
-        EOF
-
-        # Build and run the PostgreSQL container with anonymizer extension
-        docker build -f Dockerfile.postgres -t postgres-anon .
+        # Run the PostgreSQL container with anonymizer extension
         docker run -d \
           --name postgres-anon \
           -e POSTGRES_PASSWORD=postgres \
           -e POSTGRES_USER=postgres \
           -e POSTGRES_DB=test_db \
           -p 5432:5432 \
-          postgres-anon
+          registry.gitlab.com/dalibo/postgresql_anonymizer:stable
 
-        # Wait for PostgreSQL to be ready
-        until docker exec postgres-anon pg_isready -U postgres; do
-          echo "Waiting for PostgreSQL..."
+        # Wait for PostgreSQL to be ready (with timeout)
+        echo "Waiting for PostgreSQL to be ready..."
+        for i in {1..30}; do
+          if docker exec postgres-anon pg_isready -U postgres; then
+            echo "PostgreSQL is ready!"
+            break
+          fi
+          echo "Attempt $i/30: PostgreSQL not ready yet, waiting..."
           sleep 2
         done
+
+        # Final check
+        docker exec postgres-anon pg_isready -U postgres
 
     - name: Cache pip dependencies
       uses: actions/cache@v4
