@@ -101,7 +101,7 @@ def role_required_view(request: HttpRequest) -> JsonResponse:
 
 @method_decorator(login_required, name="dispatch")
 class AnonymizedCustomerView(AnonymizedDataMixin, TemplateView):
-    """Class-based view using AnonymizedDataMixin"""
+    """Class-based view using AnonymizedDataMixin to show only anonymized data"""
 
     template_name = "sample_app/anonymized_customer_view.html"
 
