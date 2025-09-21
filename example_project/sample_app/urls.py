@@ -2,14 +2,19 @@
 URL configuration for sample_app
 """
 
+from django.shortcuts import redirect
 from django.urls import path
 
 from . import anonymization_views, views
 
 app_name = "sample_app"
 
+def redirect_to_home(request):
+    """Redirect /sample/ to / to avoid duplicate pages"""
+    return redirect("/", permanent=True)
+
 urlpatterns = [
-    path("", views.index, name="index"),
+    path("", redirect_to_home, name="index"),
     path("customers/", views.customer_list, name="customer_list"),
     path("customers/<int:pk>/", views.customer_detail, name="customer_detail"),
     path("orders/", views.order_list, name="order_list"),

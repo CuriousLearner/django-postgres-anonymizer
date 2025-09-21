@@ -12,6 +12,15 @@
                 </h4>
             </div>
             <div class="card-body">
+                {% if comparison_view %}
+                <p class="lead">
+                    This view demonstrates anonymized data by showing real vs anonymized customer data side-by-side.
+                </p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Comparison Mode:</strong> Using context managers to fetch both real and anonymized data for comparison.
+                </div>
+                {% else %}
                 <p class="lead">
                     This view uses the <code>AnonymizedDataMixin</code> to automatically access anonymized data.
                 </p>
@@ -19,6 +28,7 @@
                     <i class="fas fa-info-circle me-2"></i>
                     <strong>{{ mixin_used }}</strong> automatically switches to anonymized data context for all database queries in this view.
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -35,7 +45,102 @@
 </div>
 {% endif %}
 
-{% if customers %}
+{% if comparison_view and real_customers %}
+<div class="row">
+    <!-- Real Data Column -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>Real Customer Data
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>SSN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in real_customers %}
+                            <tr>
+                                <td>
+                                    <span class="font-monospace small text-primary">{{ customer.user.username }}</span>
+                                </td>
+                                <td>
+                                    <span class="small">{{ customer.user.first_name }} {{ customer.user.last_name }}</span>
+                                </td>
+                                <td>
+                                    <span class="font-monospace small text-warning">{{ customer.phone }}</span>
+                                </td>
+                                <td>
+                                    <span class="font-monospace small text-danger">{{ customer.ssn }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Anonymized Data Column -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-mask me-2"></i>Anonymized Customer Data
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if anonymized_customers.0.error %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ anonymized_customers.0.error }}
+                </div>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>SSN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in anonymized_customers %}
+                            <tr>
+                                <td>
+                                    <span class="font-monospace small text-primary">{{ customer.user.username }}</span>
+                                </td>
+                                <td>
+                                    <span class="small">{{ customer.user.first_name }} {{ customer.user.last_name }}</span>
+                                </td>
+                                <td>
+                                    <span class="font-monospace small text-warning">{{ customer.phone }}</span>
+                                </td>
+                                <td>
+                                    <span class="font-monospace small text-danger">{{ customer.ssn }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% elif customers %}
+<!-- Fallback: Single table view for old mixin approach -->
 <div class="row">
     <div class="col-12">
         <div class="card">
