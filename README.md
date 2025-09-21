@@ -12,8 +12,7 @@
 [![Django versions](https://img.shields.io/pypi/djversions/django-postgres-anonymizer.svg)](https://pypi.org/project/django-postgres-anonymizer/)
 [![GitHub stars](https://img.shields.io/github/stars/CuriousLearner/django-postgres-anonymizer?style=social)](https://github.com/CuriousLearner/django-postgres-anonymizer)
 [![Security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![Code style: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 > [!CAUTION]
 > This package is under heavy development and is currently in alpha stage. APIs may change without notice. Not recommended for production use until stable release.
@@ -544,7 +543,7 @@ Navigate to `/admin/django_postgres_anon/` to access all features.
 - **🎸 Django**: 3.2+ (tested on 3.2, 4.0, 4.1, 4.2, 5.0)
 - **🐘 PostgreSQL**: 12+ with anonymizer extension
 - **📈 Test Coverage**: 90%+
-- **🔧 Code Quality**: Black, isort, flake8, mypy, bandit
+- **🔧 Code Quality**: Ruff, bandit
 - **🛡️ Security**: SQL injection prevention, parameterized queries, audit logging
 
 ## 🛠️ Development
