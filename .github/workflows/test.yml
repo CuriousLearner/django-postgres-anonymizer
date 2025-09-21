@@ -89,7 +89,7 @@ jobs:
         DJANGO_SETTINGS_MODULE: tests.settings
       run: |
         # Run all tests with PostgreSQL anonymizer extension available
-        pytest tests/ -v --cov=django_postgres_anon --cov-report=xml --cov-report=term-missing --cov-fail-under=87
+        pytest tests/ -v --cov=django_postgres_anon --cov-report=xml --cov-report=term-missing --cov-fail-under=87 --junitxml=junit.xml -o junit_family=legacy
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -99,6 +99,12 @@ jobs:
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
+
+    - name: Upload test results to Codecov
+      if: ${{ !cancelled() }}
+      uses: codecov/test-results-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   lint:
     runs-on: ubuntu-latest
