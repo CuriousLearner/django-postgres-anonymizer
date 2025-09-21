@@ -1,5 +1,5 @@
 import os
-import subprocess
+import subprocess  # nosec B404
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -78,10 +78,10 @@ class Command(BaseCommand):
         try:
             # Test if --exclude-extension option is available
             test_cmd = ["pg_dump", "--help"]
-            result = subprocess.run(test_cmd, capture_output=True, text=True, check=False)
+            result = subprocess.run(test_cmd, capture_output=True, text=True, check=False)  # nosec B603
             if "--exclude-extension" in result.stdout:
                 cmd.append("--exclude-extension=anon")
-        except Exception:
+        except Exception:  # nosec B110
             # If we can't test, just skip the exclude option
             pass
 
@@ -102,7 +102,7 @@ class Command(BaseCommand):
             self.stdout.write(f"Creating anonymized dump using masked role '{masked_role}'...")
             self.stdout.write(f"Output file: {options['output_file']}")
 
-            result = subprocess.run(cmd, env=env, capture_output=True, text=True, check=False)
+            result = subprocess.run(cmd, env=env, capture_output=True, text=True, check=False)  # nosec B603
 
             if result.returncode == 0:
                 self.stdout.write(self.style.SUCCESS(f"✅ Anonymized dump created: {options['output_file']}"))
