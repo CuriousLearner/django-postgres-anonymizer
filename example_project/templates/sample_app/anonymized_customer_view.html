@@ -2,6 +2,9 @@
 
 {% block title %}Anonymized Customer View - Django PostgreSQL Anonymizer{% endblock %}
 
+{% block extra_css %}
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-12">
@@ -219,23 +222,28 @@
             </div>
             <div class="card-body">
                 <h6>Class-based View with Mixin</h6>
-                <pre class="bg-light p-3 rounded"><code>from django_postgres_anon.decorators import AnonymizedDataMixin
-from django.views.generic import TemplateView
+                <div style="position: relative;">
+                    <pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 16px; margin: 0; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px; line-height: 1.45;"><code><span style="color: #d73a49; font-weight: 600;">from</span> django_postgres_anon.decorators <span style="color: #d73a49; font-weight: 600;">import</span> AnonymizedDataMixin
+<span style="color: #d73a49; font-weight: 600;">from</span> django.views.generic <span style="color: #d73a49; font-weight: 600;">import</span> TemplateView
 
-class AnonymizedCustomerView(AnonymizedDataMixin, TemplateView):
-    template_name = 'sample_app/anonymized_customer_view.html'
+<span style="color: #d73a49; font-weight: 600;">class</span> <span style="color: #6f42c1;">AnonymizedCustomerView</span>(<span style="color: #6f42c1;">AnonymizedDataMixin</span>, <span style="color: #6f42c1;">TemplateView</span>):
+    template_name = <span style="color: #032f62;">'sample_app/anonymized_customer_view.html'</span>
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    <span style="color: #d73a49; font-weight: 600;">def</span> <span style="color: #6f42c1;">get_context_data</span>(<span style="color: #e36209;">self</span>, **kwargs):
+        context = <span style="color: #005cc5;">super</span>().<span style="color: #6f42c1;">get_context_data</span>(**kwargs)
 
-        # This query will automatically use anonymized data
-        customers = Customer.objects.select_related('user').all()[:10]
+        <span style="color: #6a737d; font-style: italic;"># This query will automatically use anonymized data</span>
+        customers = Customer.objects.<span style="color: #6f42c1;">select_related</span>(<span style="color: #032f62;">'user'</span>).<span style="color: #6f42c1;">all</span>()[<span style="color: #005cc5;">:</span><span style="color: #005cc5;">10</span>]
 
-        context.update({
-            'customers': customers,
-            'mixin_used': 'AnonymizedDataMixin',
+        context.<span style="color: #6f42c1;">update</span>({
+            <span style="color: #032f62;">'customers'</span>: customers,
+            <span style="color: #032f62;">'mixin_used'</span>: <span style="color: #032f62;">'AnonymizedDataMixin'</span>,
         })
-        return context</code></pre>
+        <span style="color: #d73a49; font-weight: 600;">return</span> context</code></pre>
+                    <button onclick="copyCode(this)" style="position: absolute; top: 8px; right: 8px; background: #0366d6; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; opacity: 0.7;" title="Copy code">
+                        Copy
+                    </button>
+                </div>
 
                 <div class="mt-3">
                     <h6>Key Features</h6>
@@ -273,4 +281,44 @@ class AnonymizedCustomerView(AnonymizedDataMixin, TemplateView):
         </a>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyCode(button) {
+    const codeBlock = button.previousElementSibling.querySelector('code');
+    const text = codeBlock.textContent;
+
+    navigator.clipboard.writeText(text).then(function() {
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.style.background = '#28a745';
+        button.style.opacity = '1';
+
+        setTimeout(function() {
+            button.textContent = originalText;
+            button.style.background = '#0366d6';
+            button.style.opacity = '0.7';
+        }, 2000);
+    }).catch(function(err) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.style.background = '#28a745';
+        button.style.opacity = '1';
+
+        setTimeout(function() {
+            button.textContent = originalText;
+            button.style.background = '#0366d6';
+            button.style.opacity = '0.7';
+        }, 2000);
+    });
+}
+</script>
 {% endblock %}

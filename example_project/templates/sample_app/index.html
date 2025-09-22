@@ -127,24 +127,36 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h6><i class="fas fa-play-circle text-primary me-2"></i>1. Initialize Extension</h6>
-                        <div class="code-block">
-                            <code>python manage.py anon_init</code>
+                        <div style="position: relative;">
+                            <pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 12px; margin: 0; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;"><code><span style="color: #6f42c1;">python</span> manage.py anon_init</code></pre>
+                            <button onclick="copyCode(this)" style="position: absolute; top: 8px; right: 8px; background: #0366d6; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; opacity: 0.7;" title="Copy code">
+                                Copy
+                            </button>
                         </div>
 
                         <h6><i class="fas fa-plus text-success me-2"></i>2. Create Rules</h6>
-                        <div class="code-block">
-                            <code>python manage.py anon_load_yaml presets/django_auth.yaml</code>
+                        <div style="position: relative;">
+                            <pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 12px; margin: 0; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;"><code><span style="color: #6f42c1;">python</span> manage.py anon_load_yaml presets/django_auth.yaml</code></pre>
+                            <button onclick="copyCode(this)" style="position: absolute; top: 8px; right: 8px; background: #0366d6; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; opacity: 0.7;" title="Copy code">
+                                Copy
+                            </button>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <h6><i class="fas fa-check text-warning me-2"></i>3. Apply Anonymization</h6>
-                        <div class="code-block">
-                            <code>python manage.py anon_apply</code>
+                        <div style="position: relative;">
+                            <pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 12px; margin: 0; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;"><code><span style="color: #6f42c1;">python</span> manage.py anon_apply</code></pre>
+                            <button onclick="copyCode(this)" style="position: absolute; top: 8px; right: 8px; background: #0366d6; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; opacity: 0.7;" title="Copy code">
+                                Copy
+                            </button>
                         </div>
 
                         <h6><i class="fas fa-download text-info me-2"></i>4. Export Anonymized Data</h6>
-                        <div class="code-block">
-                            <code>python manage.py anon_dump output.sql</code>
+                        <div style="position: relative;">
+                            <pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 12px; margin: 0; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;"><code><span style="color: #6f42c1;">python</span> manage.py anon_dump output.sql</code></pre>
+                            <button onclick="copyCode(this)" style="position: absolute; top: 8px; right: 8px; background: #0366d6; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; opacity: 0.7;" title="Copy code">
+                                Copy
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -248,4 +260,44 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyCode(button) {
+    const codeBlock = button.previousElementSibling.querySelector('code');
+    const text = codeBlock.textContent;
+
+    navigator.clipboard.writeText(text).then(function() {
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.style.background = '#28a745';
+        button.style.opacity = '1';
+
+        setTimeout(function() {
+            button.textContent = originalText;
+            button.style.background = '#0366d6';
+            button.style.opacity = '0.7';
+        }, 2000);
+    }).catch(function(err) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.style.background = '#28a745';
+        button.style.opacity = '1';
+
+        setTimeout(function() {
+            button.textContent = originalText;
+            button.style.background = '#0366d6';
+            button.style.opacity = '0.7';
+        }, 2000);
+    });
+}
+</script>
 {% endblock %}
