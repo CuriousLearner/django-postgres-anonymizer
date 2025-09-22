@@ -37,9 +37,10 @@ def context_manager_demo(request: HttpRequest) -> HttpResponse:
     }
 
     try:
-        # Normal data access
-        normal_users = list(User.objects.values("username", "email", "first_name", "last_name")[:5])
-        context["normal_data"] = normal_users
+        # Normal data access - explicitly use default role to bypass middleware
+        with database_role("sanyamkhurana"):  # Use default role to get unmasked data
+            normal_users = list(User.objects.values("username", "email", "first_name", "last_name")[:5])
+            context["normal_data"] = normal_users
 
         # Using anonymized_data context manager
         try:

@@ -7,7 +7,7 @@ import random
 from datetime import datetime, timedelta
 
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -182,7 +182,7 @@ def create_demo_data(request: HttpRequest) -> HttpResponse:
     return render(request, "sample_app/create_demo_data.html")
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@login_required
 def anonymization_demo(request: HttpRequest) -> HttpResponse:
     """Demonstrate anonymization features"""
 
