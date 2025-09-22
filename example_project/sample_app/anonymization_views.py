@@ -167,7 +167,9 @@ def function_validator_demo(request: HttpRequest) -> HttpResponse:
         # Get suggestions for a column type
         column_type = request.POST.get("column_type", "email")
         try:
-            suggestions = suggest_anonymization_functions(column_type)
+            # Pass a sample column name based on the type
+            sample_column_name = f"sample_{column_type}"
+            suggestions = suggest_anonymization_functions(column_type, sample_column_name)
             context["suggestions"] = [
                 {"function": func, "description": f"Suggested for {column_type} columns"} for func in suggestions
             ]
