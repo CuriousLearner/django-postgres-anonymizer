@@ -8,14 +8,13 @@ def test_user_data(request):
     """Test view to see if dynamic masking works"""
     users = User.objects.all()[:5]
 
-    user_data = []
-    for user in users:
-        user_data.append(
-            {
-                "username": user.username,
-                "email": user.email,
-            }
-        )
+    user_data = [
+        {
+            "username": user.username,
+            "email": user.email,
+        }
+        for user in users
+    ]
 
     return JsonResponse(
         {

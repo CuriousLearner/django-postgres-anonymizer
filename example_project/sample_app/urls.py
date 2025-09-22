@@ -9,9 +9,11 @@ from . import anonymization_views, views
 
 app_name = "sample_app"
 
+
 def redirect_to_home(request):
     """Redirect /sample/ to / to avoid duplicate pages"""
     return redirect("/", permanent=True)
+
 
 urlpatterns = [
     path("", redirect_to_home, name="index"),

@@ -310,7 +310,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E501", "F403", "F405", "S", "PLR", "ERA"]
 "*/migrations/*" = ["E501", "ERA"]
-"example_project/*" = ["E501", "F403", "F405", "ERA"]
+"example_project/*" = ["E501", "F403", "F405", "ERA", "S311"]
 "__init__.py" = ["F401"]
 "conftest.py" = ["F401", "F403"]
 
