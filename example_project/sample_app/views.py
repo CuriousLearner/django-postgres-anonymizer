@@ -273,7 +273,7 @@ def anonymization_demo(request: HttpRequest) -> HttpResponse:
                     from django_postgres_anon import get_preset_path
 
                     preset_path = get_preset_path(preset_name)
-                    preset, rules_created = MaskingPreset.load_from_yaml(preset_path, f"{preset_name}_demo")
+                    _preset, rules_created = MaskingPreset.load_from_yaml(preset_path, f"{preset_name}_demo")
                     messages.success(request, f'Loaded preset "{preset_name}" with {rules_created} rules')
                 except Exception as e:
                     messages.error(request, f"Error loading preset: {e!s}")

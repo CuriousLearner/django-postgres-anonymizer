@@ -117,20 +117,17 @@ def create_masked_role(role_name, inherit_from=None):
             # Always ensure the role has proper permissions to django_postgres_anon tables
             # This is needed for the role to access the app's models even when switching contexts
             django_postgres_anon_tables = [
-                'django_postgres_anon_maskingrule',
-                'django_postgres_anon_maskingpreset',
-                'django_postgres_anon_maskingpreset_rules',
-                'django_postgres_anon_maskedrole',
-                'django_postgres_anon_maskinglog'
+                "django_postgres_anon_maskingrule",
+                "django_postgres_anon_maskingpreset",
+                "django_postgres_anon_maskingpreset_rules",
+                "django_postgres_anon_maskedrole",
+                "django_postgres_anon_maskinglog",
             ]
 
             for table in django_postgres_anon_tables:
                 try:
                     # Check if table exists first
-                    cursor.execute(
-                        "SELECT 1 FROM information_schema.tables WHERE table_name = %s",
-                        [table]
-                    )
+                    cursor.execute("SELECT 1 FROM information_schema.tables WHERE table_name = %s", [table])
                     if cursor.fetchone():
                         # Grant SELECT permissions on django_postgres_anon tables
                         cursor.execute(
@@ -139,7 +136,7 @@ def create_masked_role(role_name, inherit_from=None):
 
                         # For the MaskedRole table, also grant INSERT and UPDATE permissions
                         # so roles can update their own status
-                        if table == 'django_postgres_anon_maskedrole':
+                        if table == "django_postgres_anon_maskedrole":
                             try:
                                 cursor.execute(
                                     f"GRANT INSERT, UPDATE ON TABLE {connection.ops.quote_name(table)} TO {connection.ops.quote_name(role_name)}"
@@ -148,7 +145,9 @@ def create_masked_role(role_name, inherit_from=None):
                                 cursor.execute(
                                     f"GRANT USAGE ON SEQUENCE {connection.ops.quote_name(table + '_id_seq')} TO {connection.ops.quote_name(role_name)}"
                                 )
-                                logger.debug(f"Granted INSERT, UPDATE, and USAGE on sequence for {table} to {role_name}")
+                                logger.debug(
+                                    f"Granted INSERT, UPDATE, and USAGE on sequence for {table} to {role_name}"
+                                )
                             except Exception as write_error:
                                 logger.warning(f"Failed to grant write permissions on {table}: {write_error}")
 
@@ -160,7 +159,9 @@ def create_masked_role(role_name, inherit_from=None):
 
             # Grant CONNECT permission on database
             try:
-                cursor.execute(f"GRANT CONNECT ON DATABASE {connection.ops.quote_name(connection.settings_dict['NAME'])} TO {connection.ops.quote_name(role_name)}")
+                cursor.execute(
+                    f"GRANT CONNECT ON DATABASE {connection.ops.quote_name(connection.settings_dict['NAME'])} TO {connection.ops.quote_name(role_name)}"
+                )
                 logger.debug(f"Granted CONNECT on database to {role_name}")
             except Exception as db_error:
                 logger.warning(f"Failed to grant CONNECT permission: {db_error}")
@@ -373,7 +374,7 @@ def switch_to_role(role_name: str, auto_create: bool = True):
             cursor.execute(f"SET ROLE {role_name}")
 
             # For masked roles, also set the search path to prioritize mask schema
-            if 'mask' in role_name.lower():
+            if "mask" in role_name.lower():
                 cursor.execute("SET search_path = mask, public")
                 logger.debug(f"Set search_path to 'mask, public' for role {role_name}")
 

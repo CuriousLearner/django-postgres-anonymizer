@@ -565,6 +565,39 @@ pip install -e .
 pip install -r requirements.txt
 ```
 
+### 🎮 Demo Application
+
+The package includes a fully-featured demo application showcasing all anonymization features:
+
+```bash
+# Set up the demo application
+cd example_project
+pip install -r requirements.txt
+
+# Run migrations
+python manage.py migrate
+
+# Create demo data
+python manage.py create_demo_data
+
+# Start the development server
+python manage.py runserver
+
+# Access the demo at http://localhost:8000
+```
+
+#### Demo Features:
+- 📊 **Interactive Dashboard** - Visual demonstrations of all anonymization methods
+- 🔄 **Context Manager Examples** - Live examples with syntax-highlighted code
+- 📝 **Copy-Ready Code Snippets** - Click-to-copy code blocks for quick integration
+- 🎭 **Real vs Anonymized Comparison** - Side-by-side data comparison views
+- 🛡️ **Role-Based Access Demo** - Automatic anonymization based on user groups
+- 🧪 **Function Validator** - Test anonymization functions with live feedback
+
+#### Demo Users:
+- **admin/admin** - Superuser with full access to all data
+- **testuser/testpassword** - Regular user in `view_masked_data` group (sees anonymized data)
+
 ### 🧪 Running Tests
 
 ```bash
