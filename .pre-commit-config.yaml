@@ -1,10 +1,10 @@
 repos:
-  # Ruff - Fast Python linter and formatter (relaxed for pre-commit)
+  # Ruff - Fast Python linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.4
     hooks:
       - id: ruff
-        args: [--fix, --select=F,I]  # Only pyflakes and imports for pre-commit
+        args: [--fix]  # Use full ruff configuration, same as CI
       - id: ruff-format
 
   # Black - Python code formatter
