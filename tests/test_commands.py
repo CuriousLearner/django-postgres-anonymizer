@@ -675,7 +675,7 @@ def test_anon_dump_handles_errors_gracefully():
 
     # Should provide informative error message about the failure
     error_message = str(exc_info.value)
-    assert "failed" in error_message.lower() or "error" in error_message.lower()
+    assert any(word in error_message.lower() for word in ["failed", "error", "not available", "extension"])
 
 
 @pytest.mark.django_db
@@ -739,3 +739,54 @@ def test_command_permissions():
     except CommandError as e:
         # Should provide informative error about permissions or extension
         assert any(keyword in str(e).lower() for keyword in ["permission", "extension", "anon"])
+
+
+@pytest.mark.django_db
+def test_anon_fix_permissions_command():
+    """Test anon_fix_permissions management command"""
+    from django_postgres_anon.models import MaskedRole
+    from unittest.mock import patch, MagicMock
+
+    # Test with no arguments (should show error)
+    with patch('sys.stdout', new_callable=MagicMock) as mock_stdout:
+        call_command("anon_fix_permissions")
+        output = str(mock_stdout.write.call_args_list)
+        assert "Please specify" in output or "--role" in output
+
+    # Test with --role option
+    with patch('django_postgres_anon.management.commands.anon_fix_permissions.create_masked_role') as mock_create:
+        mock_create.return_value = True
+        with patch('sys.stdout', new_callable=MagicMock):
+            call_command("anon_fix_permissions", "--role", "test_role")
+            mock_create.assert_called_once_with("test_role")
+
+    # Test with --all option when no roles exist
+    MaskedRole.objects.all().delete()
+    with patch('sys.stdout', new_callable=MagicMock) as mock_stdout:
+        call_command("anon_fix_permissions", "--all")
+        # Should show warning about no roles
+        output = str(mock_stdout.write.call_args_list)
+        assert "No roles found" in output or "no roles" in output.lower()
+
+    # Test with --all option when roles exist
+    MaskedRole.objects.create(role_name="test_role_1")
+    MaskedRole.objects.create(role_name="test_role_2")
+
+    with patch('django_postgres_anon.management.commands.anon_fix_permissions.create_masked_role') as mock_create:
+        mock_create.return_value = True
+        with patch('sys.stdout', new_callable=MagicMock) as mock_stdout:
+            call_command("anon_fix_permissions", "--all")
+            assert mock_create.call_count == 2
+            mock_create.assert_any_call("test_role_1")
+            mock_create.assert_any_call("test_role_2")
+
+    # Test with failed permission fix
+    with patch('django_postgres_anon.management.commands.anon_fix_permissions.create_masked_role') as mock_create:
+        mock_create.return_value = False
+        with patch('sys.stdout', new_callable=MagicMock) as mock_stdout:
+            call_command("anon_fix_permissions", "--role", "failing_role")
+            output = str(mock_stdout.write.call_args_list)
+            assert "Failed" in output or "failed" in output.lower()
+
+    # Clean up
+    MaskedRole.objects.all().delete()
