@@ -217,8 +217,18 @@ class TestDatabaseOperations(TestCase):
             # Simulate successful execution
             result = create_masked_role("test_role")
             assert result is True
-            # Should execute: check if role exists, create role (role doesn't already exist)
-            assert mock_cursor_instance.execute.call_count == 2
+            # Should execute: check if role exists, create role, plus permission grants
+            # With the new permission fixes, we have exactly 9 SQL calls:
+            # 1. Check if role exists
+            # 2. Create role
+            # 3. Grant usage on schema public
+            # 4. Grant select on all tables in schema public
+            # 5. Grant usage on mask schema
+            # 6. Grant select on all tables in mask schema
+            # 7. Grant select on django_postgres_anon_maskingrule
+            # 8. Grant select on django_postgres_anon_maskedrole
+            # 9. Grant select on django_postgres_anon_maskingpreset
+            assert mock_cursor_instance.execute.call_count == 9
 
     def test_role_switch_auto_create_failure(self):
         """Role switching handles auto-create failures"""
