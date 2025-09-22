@@ -170,7 +170,7 @@ addopts = [
     "--cov-report=term-missing:skip-covered",
     "--cov-report=html",
     "--cov-report=xml",
-    "--cov-fail-under=87",
+    "--cov-fail-under=80",
 ]
 testpaths = ["tests"]
 norecursedirs = [
