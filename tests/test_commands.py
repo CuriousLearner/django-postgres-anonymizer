@@ -565,7 +565,7 @@ def test_anon_drop_requires_confirmation_for_dangerous_ops():
 
 @pytest.mark.django_db
 @patch("builtins.input", return_value="yes")
-def test_anon_drop_interactive_confirmation_accepted(mock_input):
+def test_anon_drop_interactive_confirmation_accepted(_mock_input):
     """Test drop command with interactive confirmation accepted"""
     baker.make(MaskingRule, table_name="auth_user", column_name="email")
 
@@ -789,5 +789,135 @@ def test_anon_fix_permissions_command():
             output = str(mock_stdout.write.call_args_list)
             assert "Failed" in output or "failed" in output.lower()
 
+    # Test with database error in permission fix
+    from django.db import DatabaseError
+
+    with patch("django_postgres_anon.management.commands.anon_fix_permissions.create_masked_role") as mock_create:
+        mock_create.side_effect = DatabaseError("permission denied")
+        with patch("sys.stdout", new_callable=MagicMock) as mock_stdout:
+            call_command("anon_fix_permissions", "--role", "error_role")
+            output = str(mock_stdout.write.call_args_list)
+            assert "Error fixing permissions" in output or "permission denied" in output
+
     # Clean up
     MaskedRole.objects.all().delete()
+
+
+@pytest.mark.django_db
+def test_create_masked_role_permission_failures():
+    """Test permission failure scenarios in create_masked_role to improve coverage"""
+    from unittest.mock import MagicMock, patch
+
+    from django.db import DatabaseError, OperationalError
+
+    from django_postgres_anon.utils import create_masked_role
+
+    # Test write permission failure
+    with patch("django.db.connection.cursor") as mock_cursor_ctx:
+        mock_cursor = MagicMock()
+        mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
+
+        # Mock table exists check to return True, but write permissions fail
+        def mock_execute_side_effect(sql, params=None):
+            if "INSERT, UPDATE ON TABLE" in sql:
+                raise DatabaseError("permission denied for table test_table")
+            elif "SELECT table_name FROM information_schema.tables" in sql:
+                return None  # Query for tables
+            # Let other queries pass through (CREATE ROLE, etc.)
+
+        mock_cursor.execute.side_effect = mock_execute_side_effect
+        mock_cursor.fetchall.return_value = [("auth_user",), ("django_content_type",)]  # Mock tables
+
+        result = create_masked_role("test_role")
+        assert result is True  # Should still succeed despite write permission failure
+
+    # Test table permission failure
+    with patch("django.db.connection.cursor") as mock_cursor_ctx:
+        mock_cursor = MagicMock()
+        mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
+
+        def mock_execute_side_effect(sql, params=None):
+            if "GRANT SELECT ON" in sql and "TO" in sql:
+                raise OperationalError("permission denied for table test_table")
+
+        mock_cursor.execute.side_effect = mock_execute_side_effect
+        mock_cursor.fetchall.return_value = [("auth_user",), ("django_content_type",)]
+
+        result = create_masked_role("test_role")
+        assert result is True  # Should still succeed despite table permission failure
+
+    # Test database CONNECT permission failure
+    with patch("django.db.connection.cursor") as mock_cursor_ctx:
+        mock_cursor = MagicMock()
+        mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
+
+        def mock_execute_side_effect(sql, params=None):
+            if "GRANT CONNECT ON DATABASE" in sql:
+                raise DatabaseError("permission denied for database")
+
+        mock_cursor.execute.side_effect = mock_execute_side_effect
+        mock_cursor.fetchall.return_value = []  # No tables
+
+        result = create_masked_role("test_role")
+        assert result is True  # Should still succeed despite CONNECT failure
+
+    # Test schema USAGE permission failure
+    with patch("django.db.connection.cursor") as mock_cursor_ctx:
+        mock_cursor = MagicMock()
+        mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
+
+        def mock_execute_side_effect(sql, params=None):
+            if "GRANT USAGE ON SCHEMA" in sql:
+                raise OperationalError("permission denied for schema public")
+
+        mock_cursor.execute.side_effect = mock_execute_side_effect
+        mock_cursor.fetchall.return_value = []  # No tables
+
+        result = create_masked_role("test_role")
+        assert result is True  # Should still succeed despite schema failure
+
+
+@pytest.mark.django_db
+def test_database_role_permission_failures():
+    """Test database role switching permission failures"""
+    from unittest.mock import MagicMock, patch
+
+    from django.db import OperationalError
+
+    from django_postgres_anon.context_managers import database_role
+
+    # Test role switching failure - database_role doesn't have auto_create
+    with patch("django_postgres_anon.utils.switch_to_role") as mock_switch:
+        mock_switch.return_value = False  # Role switch fails
+
+        try:
+            with database_role("nonexistent_role"):
+                # Should handle the role switch failure gracefully
+                pass
+        except RuntimeError as e:
+            assert "does not exist" in str(e)
+
+    # Test role switching permission failure in switch_to_role itself
+    with patch("django.db.connection.cursor") as mock_cursor_ctx:
+        mock_cursor = MagicMock()
+        mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
+
+        def mock_execute_side_effect(sql, params=None):
+            if "SET ROLE" in sql:
+                raise OperationalError("permission denied to set role")
+
+        mock_cursor.execute.side_effect = mock_execute_side_effect
+
+        from django_postgres_anon.utils import switch_to_role
+
+        # Test with auto_create=True
+        with patch("django_postgres_anon.utils.create_masked_role") as mock_create:
+            mock_create.return_value = True
+
+            result = switch_to_role("test_role", auto_create=True)
+            mock_create.assert_called_once_with("test_role")
+            assert result is True
+
+        # Test with auto_create=False
+        result = switch_to_role("test_role", auto_create=False)
+        assert result is False

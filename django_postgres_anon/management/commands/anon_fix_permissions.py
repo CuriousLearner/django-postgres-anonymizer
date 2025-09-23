@@ -3,6 +3,7 @@ Management command to fix permissions for anonymized roles
 """
 
 from django.core.management.base import BaseCommand
+from django.db import DatabaseError, OperationalError
 
 from django_postgres_anon.models import MaskedRole
 from django_postgres_anon.utils import create_masked_role
@@ -55,6 +56,6 @@ class Command(BaseCommand):
         try:
             # Use the create_masked_role function which now includes permission fixing
             return create_masked_role(role_name)
-        except Exception as e:
+        except (DatabaseError, OperationalError) as e:
             self.stdout.write(self.style.ERROR(f"Error fixing permissions for {role_name}: {e}"))
             return False
