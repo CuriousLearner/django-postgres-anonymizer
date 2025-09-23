@@ -769,17 +769,19 @@ def test_anon_fix_permissions_command():
         output = str(mock_stdout.write.call_args_list)
         assert "No roles found" in output or "no roles" in output.lower()
 
-    # Test with --all option when roles exist
+    # Test with --all option when roles exist - test both success paths
     MaskedRole.objects.create(role_name="test_role_1")
     MaskedRole.objects.create(role_name="test_role_2")
+    MaskedRole.objects.create(role_name="test_role_3")
 
     with patch("django_postgres_anon.management.commands.anon_fix_permissions.create_masked_role") as mock_create:
-        mock_create.return_value = True
+        # First two succeed, third fails - this covers the success_count increment
+        mock_create.side_effect = [True, True, False]
         with patch("sys.stdout", new_callable=MagicMock) as mock_stdout:
             call_command("anon_fix_permissions", "--all")
-            assert mock_create.call_count == 2
-            mock_create.assert_any_call("test_role_1")
-            mock_create.assert_any_call("test_role_2")
+            assert mock_create.call_count == 3
+            output = str(mock_stdout.write.call_args_list)
+            assert "Fixed permissions for 2/3 roles" in output
 
     # Test with failed permission fix
     with patch("django_postgres_anon.management.commands.anon_fix_permissions.create_masked_role") as mock_create:
@@ -921,3 +923,61 @@ def test_database_role_permission_failures():
         # Test with auto_create=False
         result = switch_to_role("test_role", auto_create=False)
         assert result is False
+
+
+@pytest.mark.django_db
+def test_context_manager_coverage():
+    """Test uncovered lines in context managers"""
+    from unittest.mock import patch
+
+    from django_postgres_anon.context_managers import _update_masked_role_record
+    from django_postgres_anon.models import MaskedRole
+
+    # Test early return when role already exists and is applied
+    MaskedRole.objects.create(role_name="test_role", is_applied=True)
+    _update_masked_role_record("test_role")  # Should return early without creating new record
+    assert MaskedRole.objects.filter(role_name="test_role").count() == 1
+
+    # Test exception handling in _update_masked_role_record
+    with patch("django_postgres_anon.context_managers.logger.warning") as mock_warning:
+        with patch("django_postgres_anon.models.MaskedRole.objects.get_or_create") as mock_create:
+            mock_create.side_effect = Exception("Database error")
+
+            # Should not raise exception, just log warning
+            _update_masked_role_record("error_role")
+            mock_warning.assert_called_once()
+
+    # Cleanup
+    MaskedRole.objects.all().delete()
+
+
+@pytest.mark.django_db
+def test_utils_uncovered_lines():
+    """Test uncovered lines in utils.py"""
+    from unittest.mock import MagicMock, patch
+
+    from django_postgres_anon.utils import create_masked_role, switch_to_role
+
+    # Test inheritance path when base role exists
+    with patch("django.db.connection.cursor") as mock_cursor_ctx:
+        mock_cursor = MagicMock()
+        mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
+
+        # Set up fetchone to return None for test_role check, then True for base_role check
+        # Need multiple calls: role exists check, inherit_from role check, table checks...
+        mock_cursor.fetchone.side_effect = [None, True, None, None, None, None, None]
+        mock_cursor.fetchall.return_value = []  # No tables
+
+        result = create_masked_role("test_role", inherit_from="base_role")
+        assert result is True
+
+    # Test masked role search path setting
+    with patch("django.db.connection.cursor") as mock_cursor_ctx:
+        mock_cursor = MagicMock()
+        mock_cursor_ctx.return_value.__enter__.return_value = mock_cursor
+
+        result = switch_to_role("masked_reader", auto_create=False)
+        # Should set search_path because role name contains "mask"
+        calls = mock_cursor.execute.call_args_list
+        search_path_calls = [call for call in calls if "SET search_path" in str(call)]
+        assert len(search_path_calls) > 0
