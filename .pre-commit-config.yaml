@@ -7,21 +7,6 @@ repos:
         args: [--fix]  # Use full ruff configuration, same as CI
       - id: ruff-format
 
-  # Black - Python code formatter
-  - repo: https://github.com/psf/black
-    rev: 24.10.0
-    hooks:
-      - id: black
-        language_version: python3.10
-        args: [--line-length=120]
-
-  # isort - Python import sorting
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args: [--profile=black, --line-length=120]
-
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
