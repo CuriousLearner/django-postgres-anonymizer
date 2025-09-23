@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from django.contrib.auth.models import Group, User
+from django.db import DatabaseError, OperationalError
 from django.http import HttpResponse
 from django.test import RequestFactory
 
@@ -127,7 +128,7 @@ class TestMiddlewareRoleSwitching:
                 with patch("django.db.connection.cursor") as mock_cursor:
                     with patch("django_postgres_anon.middleware.anon_config") as mock_config:
                         cursor_mock = Mock()
-                        cursor_mock.execute.side_effect = Exception("Search path error")
+                        cursor_mock.execute.side_effect = DatabaseError("Search path error")
                         mock_cursor.return_value.__enter__.return_value = cursor_mock
                         mock_config.enabled = True
                         mock_config.masked_group = "view_masked_data"
@@ -201,7 +202,7 @@ class TestMiddlewareRoleSwitching:
                     with patch("django_postgres_anon.middleware.anon_config") as mock_config:
                         cursor_mock = Mock()
                         # First call (set mask path) succeeds, second call (reset path) fails
-                        cursor_mock.execute.side_effect = [None, Exception("Reset path error")]
+                        cursor_mock.execute.side_effect = [None, OperationalError("Reset path error")]
                         mock_cursor.return_value.__enter__.return_value = cursor_mock
                         mock_config.enabled = True
                         mock_config.masked_group = "view_masked_data"
@@ -323,7 +324,7 @@ class TestMiddlewareErrorHandling:
                 mock_config.masked_group = "view_masked_data"
                 mock_config.default_masked_role = "masked_reader"
                 # Simulate database connection error
-                mock_switch.side_effect = Exception("Database connection failed")
+                mock_switch.side_effect = DatabaseError("Database connection failed")
 
                 response = middleware(request)
 

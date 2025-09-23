@@ -1,7 +1,7 @@
 import logging
 from typing import Callable
 
-from django.db import connection
+from django.db import DatabaseError, OperationalError, connection
 from django.http import HttpRequest, HttpResponse
 
 from django_postgres_anon.config import anon_config
@@ -24,11 +24,16 @@ class AnonRoleMiddleware:
         used_mask = False
 
         try:
-            should_mask = (
-                anon_config.enabled
-                and request.user.is_authenticated
-                and request.user.groups.filter(name=anon_config.masked_group).exists()
-            )
+            # Check if user should have data masked - defensive against user access issues
+            try:
+                should_mask = (
+                    anon_config.enabled
+                    and request.user.is_authenticated
+                    and request.user.groups.filter(name=anon_config.masked_group).exists()
+                )
+            except Exception:
+                # If there's any issue with user/group access, default to no masking
+                should_mask = False
 
             if should_mask:
                 masked_role = anon_config.default_masked_role
@@ -40,7 +45,7 @@ class AnonRoleMiddleware:
                         with connection.cursor() as cursor:
                             cursor.execute("SET search_path = mask, public")
                         logger.debug(f"Switched to masked role for user: {request.user.username}")
-                    except Exception as e:
+                    except (DatabaseError, OperationalError) as e:
                         logger.warning(f"Failed to set search_path: {e}")
                 else:
                     logger.error(f"Failed to switch to masked role {masked_role}")
@@ -49,7 +54,7 @@ class AnonRoleMiddleware:
             response = self.get_response(request)
             return response
 
-        except Exception as e:
+        except (DatabaseError, OperationalError) as e:
             logger.error(f"Error in AnonRoleMiddleware: {e}")
             # Continue without masking on error
             return self.get_response(request)
@@ -62,7 +67,7 @@ class AnonRoleMiddleware:
                         with connection.cursor() as cursor:
                             cursor.execute("SET search_path = public")
                         logger.debug("Reset database role and search_path")
-                    except Exception as e:
+                    except (DatabaseError, OperationalError) as e:
                         logger.error(f"Failed to reset search_path: {e}")
                 else:
                     logger.error("Failed to reset database role")

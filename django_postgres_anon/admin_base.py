@@ -4,7 +4,7 @@ import logging
 from typing import Any, Callable, Dict, List
 
 from django.contrib import admin, messages
-from django.db import connection, transaction
+from django.db import DatabaseError, OperationalError, connection, transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
@@ -220,7 +220,7 @@ class BaseAnonymizationAdmin(admin.ModelAdmin):
                         applied_count += 1
                     else:
                         errors.append(result[ERROR_FIELD])
-        except Exception as e:
+        except (DatabaseError, OperationalError) as e:
             errors.append(f"Database error: {e}")
 
         return {APPLIED_COUNT_FIELD: applied_count, ERRORS_FIELD: errors}
@@ -243,7 +243,7 @@ class BaseAnonymizationAdmin(admin.ModelAdmin):
                         errors.append(result[ERROR_FIELD])
                         if len(errors) >= MAX_ERRORS_BEFORE_ROLLBACK:
                             break
-        except Exception as e:
+        except (DatabaseError, OperationalError) as e:
             errors.append(f"Transaction failed: {e}")
 
         return {APPLIED_COUNT_FIELD: applied_count, ERRORS_FIELD: errors}

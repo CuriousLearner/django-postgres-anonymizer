@@ -3,7 +3,7 @@ import os
 from typing import Optional
 
 import yaml
-from django.db import connection, models
+from django.db import DatabaseError, OperationalError, connection, models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -211,7 +211,7 @@ def handle_rule_disabled(sender, instance, created, **kwargs):
             cursor.execute(sql)
             logger.info(f"Removed security label for disabled rule {instance.table_name}.{instance.column_name}")
 
-    except Exception as e:
+    except (DatabaseError, OperationalError) as e:
         logger.error(
             f"Failed to remove security label for disabled rule {instance.table_name}.{instance.column_name}: {e}"
         )
