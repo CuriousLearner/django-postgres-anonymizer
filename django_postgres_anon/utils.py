@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from django.conf import settings
-from django.db import connection
+from django.db import DatabaseError, OperationalError, connection
 
 from django_postgres_anon.constants import DEFAULT_POSTGRES_PORT
 
@@ -148,13 +148,13 @@ def create_masked_role(role_name, inherit_from=None):
                                 logger.debug(
                                     f"Granted INSERT, UPDATE, and USAGE on sequence for {table} to {role_name}"
                                 )
-                            except Exception as write_error:
+                            except (DatabaseError, OperationalError) as write_error:
                                 logger.warning(f"Failed to grant write permissions on {table}: {write_error}")
 
                         logger.debug(f"Granted SELECT on {table} to {role_name}")
                     else:
                         logger.debug(f"Table {table} does not exist, skipping permission grant")
-                except Exception as table_error:
+                except (DatabaseError, OperationalError) as table_error:
                     logger.warning(f"Failed to grant permissions on {table} to {role_name}: {table_error}")
 
             # Grant CONNECT permission on database
@@ -163,18 +163,18 @@ def create_masked_role(role_name, inherit_from=None):
                     f"GRANT CONNECT ON DATABASE {connection.ops.quote_name(connection.settings_dict['NAME'])} TO {connection.ops.quote_name(role_name)}"
                 )
                 logger.debug(f"Granted CONNECT on database to {role_name}")
-            except Exception as db_error:
+            except (DatabaseError, OperationalError) as db_error:
                 logger.warning(f"Failed to grant CONNECT permission: {db_error}")
 
             # Grant USAGE on schema
             try:
                 cursor.execute(f"GRANT USAGE ON SCHEMA public TO {connection.ops.quote_name(role_name)}")
                 logger.debug(f"Granted USAGE on schema public to {role_name}")
-            except Exception as schema_error:
+            except (DatabaseError, OperationalError) as schema_error:
                 logger.warning(f"Failed to grant USAGE on schema: {schema_error}")
 
             return True
-    except Exception as e:
+    except (DatabaseError, OperationalError) as e:
         logger.debug(f"Failed to create role {role_name}: {e}")
         return False
 
@@ -379,7 +379,7 @@ def switch_to_role(role_name: str, auto_create: bool = True):
                 logger.debug(f"Set search_path to 'mask, public' for role {role_name}")
 
             return True
-    except Exception as e:
+    except (DatabaseError, OperationalError) as e:
         logger.debug(f"Failed to switch to role {role_name}: {e}")
         if auto_create:
             return create_masked_role(role_name)
