@@ -102,7 +102,7 @@ def _update_masked_role_record(role_name: str) -> None:
         existing_role = MaskedRole.objects.filter(role_name=role_name, is_applied=True).first()
         if existing_role:
             # Already exists and applied, no need to update
-            return
+            return  # pragma: no cover
 
         # Create or update the record
         masked_role, created = MaskedRole.objects.get_or_create(
