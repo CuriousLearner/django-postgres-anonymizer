@@ -19,7 +19,7 @@
 
 Database anonymization for Django using [PostgreSQL Anonymizer](https://postgresql-anonymizer.readthedocs.io/).
 
-**🔒 Secure • 🚀 Fast • 🎯 Precise • 📊 Production-Ready (coming-soon)**
+## 🔒 Secure • 🚀 Fast • 🎯 Precise • 📊 Production-Ready (coming-soon)
 
 A comprehensive Django integration for PostgreSQL Anonymizer that provides database anonymization with advanced role management, context-aware data masking, and production-ready security features.
 
@@ -30,11 +30,8 @@ A comprehensive Django integration for PostgreSQL Anonymizer that provides datab
 - [🎯 Use Cases](#-use-cases)
 - [⚡ Quick Start](#-quick-start)
 - [📖 Usage Examples](#-usage-examples)
-- [🔧 Configuration](#-configuration)
 - [📚 API Reference](#-api-reference)
-- [🎭 Advanced Features](#-advanced-features)
 - [🛠️ Development](#️-development)
-- [🧪 Testing](#-testing)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
@@ -586,7 +583,8 @@ python manage.py runserver
 # Access the demo at http://localhost:8000
 ```
 
-#### Demo Features:
+#### Demo Features
+
 - 📊 **Interactive Dashboard** - Visual demonstrations of all anonymization methods
 - 🔄 **Context Manager Examples** - Live examples with syntax-highlighted code
 - 📝 **Copy-Ready Code Snippets** - Click-to-copy code blocks for quick integration
@@ -594,7 +592,8 @@ python manage.py runserver
 - 🛡️ **Role-Based Access Demo** - Automatic anonymization based on user groups
 - 🧪 **Function Validator** - Test anonymization functions with live feedback
 
-#### Demo Users:
+#### Demo Users
+
 - **admin/admin** - Superuser with full access to all data
 - **testuser/testpassword** - Regular user in `view_masked_data` group (sees anonymized data)
 
