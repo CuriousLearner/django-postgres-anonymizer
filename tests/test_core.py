@@ -271,9 +271,26 @@ class TestMaskedRoleBehavior:
 class TestAnonConfiguration:
     """Test anonymization configuration behavior"""
 
-    def test_config_has_essential_properties(self):
+    @pytest.mark.parametrize(
+        "prop",
+        [
+            "default_masked_role",
+            "masked_group",
+            "anonymized_data_role",
+            "enabled",
+            "auto_apply_rules",
+            "validate_functions",
+            "allow_custom_functions",
+            "enable_logging",
+        ],
+    )
+    def test_config_has_essential_properties(self, prop):
         """Configuration provides all essential settings"""
-        essential_properties = [
+        assert hasattr(anon_config, prop)
+
+    @pytest.mark.parametrize(
+        "prop",
+        [
             "default_masked_role",
             "masked_group",
             "anonymized_data_role",
@@ -282,28 +299,12 @@ class TestAnonConfiguration:
             "validate_functions",
             "allow_custom_functions",
             "enable_logging",
-        ]
-
-        for prop in essential_properties:
-            assert hasattr(anon_config, prop)
-
-    def test_config_provides_sensible_defaults(self):
+        ],
+    )
+    def test_config_provides_sensible_defaults(self, prop):
         """Configuration has reasonable default values"""
-        # These should not be None
-        non_null_defaults = [
-            "default_masked_role",
-            "masked_group",
-            "anonymized_data_role",
-            "enabled",
-            "auto_apply_rules",
-            "validate_functions",
-            "allow_custom_functions",
-            "enable_logging",
-        ]
-
-        for prop in non_null_defaults:
-            value = getattr(anon_config, prop)
-            assert value is not None, f"Config {prop} should have a default value"
+        value = getattr(anon_config, prop)
+        assert value is not None, f"Config {prop} should have a default value"
 
     def test_config_types_are_correct(self):
         """Configuration values have expected types"""

@@ -240,7 +240,6 @@ def test_middleware_handles_multiple_requests(request_factory, mock_get_response
         response = middleware(request)
         assert response.status_code == 200
 
-    # Should handle all requests successfully
     assert mock_get_response.call_count == 5
 
 
@@ -259,7 +258,6 @@ def test_middleware_with_user_in_multiple_groups(request_factory, mock_get_respo
 
     response = middleware(request)
 
-    # Should handle user with multiple groups
     assert response.status_code == 200
     mock_get_response.assert_called_once_with(request)
 
@@ -275,7 +273,6 @@ def test_middleware_with_superuser(request_factory, mock_get_response):
 
     response = middleware(request)
 
-    # Should handle superuser normally
     assert response.status_code == 200
     mock_get_response.assert_called_once_with(request)
 
@@ -291,6 +288,5 @@ def test_middleware_with_staff_user(request_factory, mock_get_response):
 
     response = middleware(request)
 
-    # Should handle staff user normally
     assert response.status_code == 200
     mock_get_response.assert_called_once_with(request)

@@ -1,7 +1,4 @@
-"""
-Additional tests to increase coverage for remaining uncovered lines
-Targeting: __init__.py (40-42), admin_base.py (223-224, 246-247, 337, 349-351, 356, 359), models.py (206-215)
-"""
+"""Tests for edge cases and error handling."""
 
 import sys
 from unittest.mock import MagicMock, patch
@@ -18,16 +15,15 @@ from django_postgres_anon.models import MaskingRule
 
 
 class TestVersionParsing(TestCase):
-    """Test version parsing edge cases - covers __init__.py lines 40-42"""
+    """Test version parsing edge cases."""
 
     def test_version_with_build_metadata(self):
-        """Test version parsing with build metadata to cover line 40"""
+        """Test version parsing with build metadata."""
 
-        # Test the exact code path from __init__.py
-        # We need to test the actual regex parsing logic
+        # Test regex parsing logic for version strings
         import re
 
-        # Test a version string that matches the pattern with build metadata
+        # Test with build metadata
         version_string = "1.2.3-alpha.1+build.123"
         pattern = (
             r"(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?"
@@ -40,21 +36,21 @@ class TestVersionParsing(TestCase):
             version_info = (int(major), int(minor), int(patch))
             if prerelease:
                 version_info += (prerelease,)
-            if build:  # This covers line 40
+            if build:
                 version_info += (build,)
         else:
-            version_info = (0, 1, 0)  # This covers lines 41-42
+            version_info = (0, 1, 0)
 
         # Verify build metadata was included
         assert len(version_info) == 5
         assert version_info[-1] == "build.123"
 
     def test_version_parsing_fallback(self):
-        """Test version parsing fallback to cover lines 41-42"""
+        """Test version parsing with invalid input."""
 
         import re
 
-        # Test with invalid version string that won't match regex
+        # Invalid version string
         version_string = "invalid-version"
         pattern = (
             r"(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?"
@@ -70,14 +66,14 @@ class TestVersionParsing(TestCase):
             if build:
                 version_info += (build,)
         else:
-            version_info = (0, 1, 0)  # This covers lines 41-42
+            version_info = (0, 1, 0)
 
         # Should fallback to default
         assert version_info == (0, 1, 0)
 
 
 class TestAdminBaseExceptions(TestCase):
-    """Test admin base exception handling to increase coverage"""
+    """Test admin exception handling."""
 
     def setUp(self):
         self.admin = BaseAnonymizationAdmin(MaskingRule, AdminSite())
@@ -87,7 +83,7 @@ class TestAdminBaseExceptions(TestCase):
         self.request.META = {}
 
     def test_dry_run_batch_with_database_error(self):
-        """Test dry run batch database error - covers lines 223-224"""
+        """Test dry run batch operation with database error."""
 
         rule = MaskingRule.objects.create(
             table_name="test_table", column_name="test_column", function_expr="anon.fake_email()", enabled=True
@@ -101,13 +97,13 @@ class TestAdminBaseExceptions(TestCase):
 
             result = self.admin._execute_dry_run_batch(queryset, self.admin.apply_rule_operation, "apply")
 
-            # Should handle the exception and return it in errors (covers lines 223-224)
+            # Should handle the exception and return it in errors
             assert result["applied_count"] == 0
             assert len(result["errors"]) > 0
             assert "Database error" in result["errors"][0]
 
     def test_transaction_batch_with_database_error(self):
-        """Test transaction batch database error - covers lines 246-247"""
+        """Test transaction batch operation with database error."""
 
         rule = MaskingRule.objects.create(
             table_name="test_table", column_name="test_column", function_expr="anon.fake_email()", enabled=True
@@ -122,13 +118,13 @@ class TestAdminBaseExceptions(TestCase):
 
             result = self.admin._execute_transaction_batch(queryset, self.admin.apply_rule_operation, "apply")
 
-            # Should handle the exception and return it in errors (covers lines 246-247)
+            # Should handle the exception and return it in errors
             assert result["applied_count"] == 0
             assert len(result["errors"]) > 0
             assert "Transaction failed" in result["errors"][0]
 
     def test_enable_rules_no_effect(self):
-        """Test enable rules when no rules need enabling - covers line 337"""
+        """Test enable operation when all rules are already enabled."""
 
         # Create rules that are already enabled
         rule1 = MaskingRule.objects.create(
@@ -150,11 +146,11 @@ class TestAdminBaseExceptions(TestCase):
         with patch.object(self.admin, "message_user") as mock_message:
             self.admin.enable_rules_operation(self.request, queryset)
 
-            # Should show warning message (covers line 337)
+            # Should show warning message
             mock_message.assert_called_with(self.request, "No rules were enabled", level=messages.WARNING)
 
     def test_disable_rules_with_save_failure(self):
-        """Test disable rules with save failure - covers lines 349-351"""
+        """Test disable operation when save fails."""
 
         rule = MaskingRule.objects.create(
             table_name="test_table", column_name="test_column", function_expr="anon.fake_email()", enabled=True
@@ -168,11 +164,11 @@ class TestAdminBaseExceptions(TestCase):
                 with patch.object(self.admin, "message_user"):
                     self.admin.disable_rules_operation(self.request, queryset)
 
-                    # Should log the error (covers lines 349-351)
+                    # Should log the error
                     mock_logger.error.assert_called()
 
     def test_disable_rules_no_enabled_rules(self):
-        """Test disable rules when no rules are enabled - covers line 359"""
+        """Test disable operation when all rules are already disabled."""
 
         # Create rules that are already disabled
         rule = MaskingRule.objects.create(
@@ -187,12 +183,12 @@ class TestAdminBaseExceptions(TestCase):
         with patch.object(self.admin, "message_user") as mock_message:
             self.admin.disable_rules_operation(self.request, queryset)
 
-            # Should show warning message (covers line 359)
+            # Should show warning message
             mock_message.assert_called_with(self.request, "No rules were disabled", level=messages.WARNING)
 
 
 class TestSignalDatabaseOperations(TestCase):
-    """Test signal database operations - covers models.py lines 206-215"""
+    """Test signal database operations."""
 
     def test_signal_database_execution_success(self):
         """Test successful database operation in signal"""
@@ -243,7 +239,7 @@ class TestSignalDatabaseOperations(TestCase):
         rule.enabled = False
 
         # Let the signal execute naturally - it will hit the database
-        # and handle the error gracefully (covers lines 216-219)
+        # and handle the error gracefully
         from django_postgres_anon.models import handle_rule_disabled
 
         # This should execute the database code and handle any exceptions

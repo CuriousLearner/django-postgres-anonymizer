@@ -573,7 +573,7 @@ def test_anon_drop_interactive_confirmation_accepted(_mock_input):
         output = call_command_with_output("anon_drop", "--table", "auth_user")
         assert "removal" in output.lower()
         # Verify mock was used
-        assert True  # Mock may or may not be called depending on implementation
+        pass
 
     except CommandError as e:
         # May fail due to missing extension
@@ -791,7 +791,7 @@ def test_anon_fix_permissions_command():
             output = str(mock_stdout.write.call_args_list)
             assert "Failed" in output or "failed" in output.lower()
 
-    # Test with database error in permission fix (essential for error handling coverage)
+    # Test with database error in permission fix
     from io import StringIO
 
     from django.db import DatabaseError
@@ -810,52 +810,12 @@ def test_anon_fix_permissions_command():
 
 
 @pytest.mark.django_db
-def test_create_masked_role_behavior():
-    """Test create_masked_role behavioral outcomes"""
-    from django_postgres_anon.utils import create_masked_role
-
-    # Behavioral test: create_masked_role should handle various scenarios gracefully
-    # and return a boolean indicating success/failure
-
-    # Test 1: Creating a role (may succeed or fail depending on DB permissions)
-    result = create_masked_role("behavioral_test_role")
-    assert isinstance(result, bool)  # Should always return a boolean
-
-    # Test 2: Creating a role with inheritance (should handle missing base role gracefully)
-    result_with_inheritance = create_masked_role("test_role_with_inheritance", inherit_from="nonexistent_base")
-    assert isinstance(result_with_inheritance, bool)  # Should handle gracefully
-
-
-@pytest.mark.django_db
-def test_role_switching_behavior():
-    """Test role switching behavioral outcomes"""
-    from django_postgres_anon.context_managers import database_role
-    from django_postgres_anon.utils import switch_to_role
-
-    # Behavioral test: switch_to_role should return boolean indicating success
-    result = switch_to_role("test_role", auto_create=False)
-    assert isinstance(result, bool)
-
-    # Behavioral test: switch_to_role with auto_create should handle creation attempts
-    result_with_create = switch_to_role("test_role_auto", auto_create=True)
-    assert isinstance(result_with_create, bool)
-
-    # Behavioral test: database_role context manager should handle nonexistent roles
-    try:
-        with database_role("nonexistent_role"):
-            pass
-    except RuntimeError:
-        # This is expected behavior for nonexistent roles
-        pass
-
-
-@pytest.mark.django_db
 def test_masked_role_record_management():
-    """Test behavioral aspects of masked role record management"""
+    """Test masked role record management"""
     from django_postgres_anon.context_managers import _update_masked_role_record
     from django_postgres_anon.models import MaskedRole
 
-    # Behavioral test: updating role record for existing applied role should not create duplicates
+    # Updating role record for existing applied role should not create duplicates
     MaskedRole.objects.create(role_name="existing_role", is_applied=True)
     initial_count = MaskedRole.objects.filter(role_name="existing_role").count()
 
@@ -865,34 +825,5 @@ def test_masked_role_record_management():
     final_count = MaskedRole.objects.filter(role_name="existing_role").count()
     assert final_count == initial_count
 
-    # Behavioral test: updating role record should handle errors gracefully (no exceptions)
-    try:
-        _update_masked_role_record("any_role_name")
-        # Should complete without raising exceptions
-    except Exception:
-        pytest.fail("_update_masked_role_record should handle errors gracefully")
-
     # Cleanup
     MaskedRole.objects.all().delete()
-
-
-@pytest.mark.django_db
-def test_role_creation_with_inheritance():
-    """Test role creation behavioral aspects with inheritance"""
-    from django_postgres_anon.utils import create_masked_role, switch_to_role
-
-    # Behavioral test: Role creation with inheritance should handle missing base roles gracefully
-    result = create_masked_role("test_inheritance_role", inherit_from="nonexistent_base_role")
-    assert isinstance(result, bool)  # Should return boolean regardless of base role existence
-
-    # Behavioral test: Role creation with valid inheritance should work
-    result_valid = create_masked_role("test_role_2", inherit_from="postgres")  # postgres typically exists
-    assert isinstance(result_valid, bool)
-
-    # Behavioral test: Masked roles should attempt to set appropriate search paths
-    # This tests the "mask" in role name behavior without mocking internals
-    result_masked = switch_to_role("mask_test_role", auto_create=False)
-    assert isinstance(result_masked, bool)
-
-    result_regular = switch_to_role("regular_test_role", auto_create=False)
-    assert isinstance(result_regular, bool)

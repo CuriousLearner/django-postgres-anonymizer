@@ -25,7 +25,7 @@ def test_system_rejects_masking_rules_with_missing_required_fields():
     This ensures data integrity and prevents configuration errors that could
     lead to failed anonymization operations.
     """
-    # Arrange: Create rule with missing required fields
+    # Create rule with missing required fields
     incomplete_rule = baker.make(
         MaskingRule,
         table_name="",  # Missing required field
@@ -47,81 +47,77 @@ def test_system_handles_extremely_long_identifiers_gracefully():
     Users may accidentally enter very long names, and the system should
     handle this gracefully without crashing.
     """
-    # Arrange: Create rule with excessively long identifiers
+    # Create rule with excessively long identifiers
     long_table_name = "test_table_" + "x" * EXCESSIVE_LENGTH
     long_column_name = "test_column_" + "y" * EXCESSIVE_LENGTH
     long_function = "anon.fake_email()" + "z" * 100
 
-    # Act: Create rule with long identifiers
     rule = baker.make(
         MaskingRule, table_name=long_table_name, column_name=long_column_name, function_expr=long_function, enabled=True
     )
 
-    # Assert: System should store the values without corruption
     assert rule.table_name == long_table_name
     assert rule.column_name == long_column_name
     assert rule.function_expr == long_function
 
 
 @pytest.mark.django_db
-def test_system_supports_special_characters_in_database_identifiers():
+@pytest.mark.parametrize(
+    "table_name,column_name",
+    [
+        ("table-with-dashes", "column_with_underscores"),
+        ("table.with.dots", "column.with.dots"),
+        ("table with spaces", "column with spaces"),
+        ('table"with"quotes', 'column"with"quotes'),
+        ("table'with'quotes", "column'with'quotes"),
+    ],
+)
+def test_system_supports_special_characters_in_database_identifiers(table_name, column_name):
     """
     System should handle database identifiers with special characters
 
     Real-world databases may have tables/columns with dashes, dots, quotes,
     or spaces, and the system should support these.
     """
-    # Arrange: Special character scenarios that users might encounter
-    special_character_scenarios = [
-        ("table-with-dashes", "column_with_underscores"),
-        ("table.with.dots", "column.with.dots"),
-        ("table with spaces", "column with spaces"),
-        ('table"with"quotes', 'column"with"quotes'),
-        ("table'with'quotes", "column'with'quotes"),
-    ]
+    rule = baker.make(
+        MaskingRule, table_name=table_name, column_name=column_name, function_expr="anon.fake_email()", enabled=True
+    )
 
-    for table_name, column_name in special_character_scenarios:
-        # Act: Create rule with special characters
-        rule = baker.make(
-            MaskingRule, table_name=table_name, column_name=column_name, function_expr="anon.fake_email()", enabled=True
-        )
-
-        # Assert: System should preserve special characters accurately
-        assert rule.table_name == table_name
-        assert rule.column_name == column_name
+    # System should preserve special characters accurately
+    assert rule.table_name == table_name
+    assert rule.column_name == column_name
 
 
 @pytest.mark.django_db
-def test_system_supports_international_and_unicode_characters():
+@pytest.mark.parametrize(
+    "table_name,column_name,notes",
+    [
+        ("üser_täble", "ñame_çolumn", "Unicode test: åßč∂"),
+        ("用户表", "邮件列", "中文测试"),
+        ("пользователи", "электронная_почта", "русский тест"),
+        ("usuarios", "correo_electrónico", "prueba en español"),
+    ],
+)
+def test_system_supports_international_and_unicode_characters(table_name, column_name, notes):
     """
     System should handle Unicode and international characters in all fields
 
     Global users may have database schemas with international characters,
     and the system should support these properly.
     """
-    # Arrange: International character scenarios
-    unicode_scenarios = [
-        ("üser_täble", "ñame_çolumn", "Unicode test: åßč∂"),
-        ("用户表", "邮件列", "中文测试"),
-        ("пользователи", "электронная_почта", "русский тест"),
-        ("usuarios", "correo_electrónico", "prueba en español"),
-    ]
+    rule = baker.make(
+        MaskingRule,
+        table_name=table_name,
+        column_name=column_name,
+        function_expr="anon.fake_email()",
+        notes=notes,
+        enabled=True,
+    )
 
-    for table_name, column_name, notes in unicode_scenarios:
-        # Act: Create rule with international characters
-        rule = baker.make(
-            MaskingRule,
-            table_name=table_name,
-            column_name=column_name,
-            function_expr="anon.fake_email()",
-            notes=notes,
-            enabled=True,
-        )
-
-        # Assert: System should preserve Unicode characters correctly
-        assert rule.table_name == table_name
-        assert rule.column_name == column_name
-        assert rule.notes == notes
+    # System should preserve Unicode characters correctly
+    assert rule.table_name == table_name
+    assert rule.column_name == column_name
+    assert rule.notes == notes
 
 
 @pytest.mark.django_db
@@ -132,7 +128,6 @@ def test_system_handles_large_numbers_of_masking_rules_efficiently():
     Enterprise users may have hundreds or thousands of rules, and the system
     should maintain good performance and stability.
     """
-    # Act: Create large number of masking rules
     rules = []
     for i in range(LARGE_RULE_COUNT):
         rule = baker.make(
@@ -144,7 +139,6 @@ def test_system_handles_large_numbers_of_masking_rules_efficiently():
         )
         rules.append(rule)
 
-    # Assert: System should handle large numbers efficiently
     assert len(rules) == LARGE_RULE_COUNT
     assert all(rule.enabled for rule in rules)
     assert MaskingRule.objects.count() >= LARGE_RULE_COUNT
@@ -158,7 +152,7 @@ def test_system_handles_concurrent_rule_applications_safely():
     Multiple users or processes may mark rules as applied simultaneously,
     and the system should handle this safely.
     """
-    # Arrange: Create a rule for concurrent operations
+    # Create a rule for concurrent operations
     rule = baker.make(
         MaskingRule,
         table_name="test_concurrent_table",
@@ -167,30 +161,21 @@ def test_system_handles_concurrent_rule_applications_safely():
         enabled=True,
     )
 
-    # Act: Simulate concurrent marking as applied
     rule.mark_applied()
     first_applied_time = rule.applied_at
     assert first_applied_time is not None
 
-    # Act: Try to mark again (simulating concurrent access)
     rule.mark_applied()
     second_applied_time = rule.applied_at
 
-    # Assert: Should handle gracefully without corruption
     assert second_applied_time is not None
     assert second_applied_time >= first_applied_time
 
 
 @pytest.mark.django_db
-def test_system_rejects_dangerous_function_expressions_for_security():
-    """
-    System should reject potentially dangerous function expressions
-
-    Users may accidentally or maliciously enter SQL injection attempts,
-    and the system should protect against these security risks.
-    """
-    # Arrange: Potentially dangerous function expressions
-    dangerous_expressions = [
+@pytest.mark.parametrize(
+    "dangerous_expr",
+    [
         "not_anon.fake_email()",  # Wrong namespace
         "anon.fake_email();DROP TABLE users;",  # SQL injection attempt
         "anon.fake_email()--comment",  # SQL comment injection
@@ -199,14 +184,18 @@ def test_system_rejects_dangerous_function_expressions_for_security():
         "anon()",  # Invalid function syntax
         "",  # Empty function
         None,  # None value
-    ]
+    ],
+)
+def test_system_rejects_dangerous_function_expressions_for_security(dangerous_expr):
+    """
+    System should reject potentially dangerous function expressions
 
-    for dangerous_expr in dangerous_expressions:
-        # Act: Validate dangerous function expression
-        result = validate_function_syntax(dangerous_expr)
+    Users may accidentally or maliciously enter SQL injection attempts,
+    and the system should protect against these security risks.
+    """
+    result = validate_function_syntax(dangerous_expr)
 
-        # Assert: System should reject dangerous expressions
-        assert result is False, f"Dangerous expression '{dangerous_expr}' should be rejected for security"
+    assert result is False, f"Dangerous expression '{dangerous_expr}' should be rejected for security"
 
 
 @pytest.mark.django_db
@@ -221,7 +210,7 @@ def test_operation_logging_handles_unusual_data():
     long_error_message = "Database error: " + "A" * 1000  # Reasonable size for testing
     log = create_operation_log("test_operation", success=False, error_message=long_error_message)
 
-    # Assert: Should handle long errors gracefully
+    # Should handle long errors gracefully
     assert log.success is False
     assert len(log.error_message) > 0  # Should contain error information
 
@@ -229,21 +218,14 @@ def test_operation_logging_handles_unusual_data():
     unicode_error = "Ошибка базы данных: 数据库错误"
     log = create_operation_log("test_operation", success=False, error_message=unicode_error)
 
-    # Assert: Should handle Unicode errors correctly
     assert log.success is False
     assert "Ошибка" in log.error_message or "数据库" in log.error_message
 
 
 @pytest.mark.django_db
-def test_function_suggestions_work_with_unusual_column_patterns():
-    """
-    Function suggestion system should handle unusual column names gracefully
-
-    Users may have unusual naming conventions, and the system should
-    provide reasonable suggestions even for edge cases.
-    """
-    # Arrange: Edge case column patterns
-    edge_case_patterns = [
+@pytest.mark.parametrize(
+    "data_type,column_name",
+    [
         ("", ""),  # Empty strings
         ("a" * 100, "b" * 100),  # Very long names
         ("UPPERCASE_TYPE", "UPPERCASE_COLUMN"),  # All uppercase
@@ -251,16 +233,20 @@ def test_function_suggestions_work_with_unusual_column_patterns():
         ("123numeric", "456numeric"),  # Numeric prefixes
         ("special!@#", "chars$%^"),  # Special characters
         ("unicode_测试", "колонка"),  # Unicode characters
-    ]
+    ],
+)
+def test_function_suggestions_work_with_unusual_column_patterns(data_type, column_name):
+    """
+    Function suggestion system should handle unusual column names gracefully
 
-    for data_type, column_name in edge_case_patterns:
-        # Act: Get function suggestions for edge case patterns
-        suggestions = suggest_anonymization_functions(data_type or "", column_name or "")
+    Users may have unusual naming conventions, and the system should
+    provide reasonable suggestions even for edge cases.
+    """
+    suggestions = suggest_anonymization_functions(data_type or "", column_name or "")
 
-        # Assert: Should always provide reasonable suggestions
-        assert isinstance(suggestions, list)
-        # Should always include hash as a fallback option
-        assert any("hash" in suggestion for suggestion in suggestions)
+    assert isinstance(suggestions, list)
+    # Should always include hash as a fallback option
+    assert any("hash" in suggestion for suggestion in suggestions)
 
 
 @pytest.mark.django_db
@@ -274,7 +260,6 @@ def test_preset_system_handles_empty_and_complex_configurations():
     # Test 1: Empty preset (no rules)
     empty_preset = baker.make(MaskingPreset, name="Empty Configuration Preset", preset_type="custom")
 
-    # Assert: Should handle empty presets gracefully
     assert empty_preset.rules.count() == 0
     assert str(empty_preset)  # String representation shouldn't crash
 
@@ -283,7 +268,6 @@ def test_preset_system_handles_empty_and_complex_configurations():
     rule = baker.make(MaskingRule)
     preset_with_rules.rules.add(rule)
 
-    # Assert: Should handle preset-rule relationships correctly
     assert preset_with_rules.rules.count() == 1
 
 
@@ -310,7 +294,6 @@ def test_logging_system_handles_large_and_unusual_data():
         MaskingLog, operation="large_data_test", user="test@example.com", success=True, details=large_details
     )
 
-    # Assert: Should store large data without issues (JSONField handles this)
     assert log_large_data.details == large_details
     assert len(log_large_data.details["operation_data"]) == 100000
 
@@ -359,10 +342,8 @@ def test_configuration_system_provides_reasonable_defaults():
     ]
 
     for property_name in essential_properties:
-        # Act: Access configuration property
         value = getattr(anon_config, property_name)
 
-        # Assert: Should provide reasonable default
         assert value is not None, f"Config property '{property_name}' should have a default value"
 
 
@@ -379,7 +360,7 @@ def test_admin_validation_handles_empty_and_invalid_selections():
     """
     from django_postgres_anon.admin_base import BaseAnonymizationAdmin
 
-    # Arrange: Set up admin and request
+    # Set up admin and request
     admin = BaseAnonymizationAdmin(MaskingRule, None)
     factory = RequestFactory()
     request = factory.post("/admin/")
@@ -391,14 +372,12 @@ def test_admin_validation_handles_empty_and_invalid_selections():
     empty_queryset = MaskingRule.objects.none()
     result = admin._validate_operation_preconditions(request, empty_queryset, "apply")
 
-    # Assert: Should reject empty selections with clear feedback
     assert result is False
 
     # Test 2: Invalid operation type
     rules_queryset = MaskingRule.objects.all()
     result = admin._validate_operation_preconditions(request, rules_queryset, "invalid_operation_type")
 
-    # Assert: Should reject invalid operations
     assert result is False
 
 

@@ -363,7 +363,7 @@ def test_admin_changelist_view_functions_correctly(admin_setup):
         pass
 
 
-# Additional tests for admin_base.py coverage
+# Additional admin tests
 
 
 @pytest.mark.django_db

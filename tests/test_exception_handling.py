@@ -67,7 +67,7 @@ class ExceptionHandlingBehaviorTestCase(TestCase):
                 rule.table_name = "updated_table"  # This would trigger post_save signal
 
                 # The point is that signal handlers should be defensive
-                self.assertTrue(True)  # Test passes if no exception is raised
+                pass
 
         except DatabaseError:
             # If DatabaseError is raised, that's expected database behavior
