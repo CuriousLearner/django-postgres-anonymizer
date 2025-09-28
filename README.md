@@ -774,21 +774,39 @@ python manage.py anon_fix_permissions [--role name | --all]  # Fix role permissi
 
 ### Configuration Settings
 
-```python
-POSTGRES_ANON = {
-    # Core settings
-    'DEFAULT_MASKED_ROLE': 'masked_reader',     # Default role for anonymization
-    'ANONYMIZED_DATA_ROLE': 'masked_reader',    # Role for anonymized_data()
-    'MASKED_GROUP': 'masked_users',             # Django group for middleware
+Configuration follows [12-factor app principles](https://12factor.net/config). Settings can be configured via:
 
-    # Behavior settings
-    'ENABLED': True,                            # Enable anonymization features
-    'AUTO_APPLY_RULES': False,                  # Auto-apply when enabled
-    'VALIDATE_FUNCTIONS': True,                 # Validate function syntax
-    'ALLOW_CUSTOM_FUNCTIONS': False,            # Allow non-anon functions
-    'ENABLE_LOGGING': True,                     # Enable audit logging
-}
-```
+1. **Environment variables (recommended for production)**:
+
+   ```bash
+   export POSTGRES_ANON_ENABLED=true
+   export POSTGRES_ANON_DEFAULT_MASKED_ROLE=masked_reader
+   export POSTGRES_ANON_MASKED_GROUP=view_masked_data
+   export POSTGRES_ANON_AUTO_APPLY_RULES=false
+   export POSTGRES_ANON_VALIDATE_FUNCTIONS=true
+   export POSTGRES_ANON_ALLOW_CUSTOM_FUNCTIONS=false
+   export POSTGRES_ANON_ENABLE_LOGGING=true
+   ```
+
+2. **Django settings (for development)**:
+
+   ```python
+   POSTGRES_ANON = {
+       # Core settings
+       'DEFAULT_MASKED_ROLE': 'masked_reader',     # Default role for anonymization
+       'ANONYMIZED_DATA_ROLE': 'masked_reader',    # Role for anonymized_data()
+       'MASKED_GROUP': 'masked_users',             # Django group for middleware
+
+       # Behavior settings
+       'ENABLED': True,                            # Enable anonymization features
+       'AUTO_APPLY_RULES': False,                  # Auto-apply when enabled
+       'VALIDATE_FUNCTIONS': True,                 # Validate function syntax
+       'ALLOW_CUSTOM_FUNCTIONS': False,            # Allow non-anon functions
+       'ENABLE_LOGGING': True,                     # Enable audit logging
+   }
+   ```
+
+**Priority**: Environment variables override Django settings, which override defaults.
 
 ## Documentation
 
