@@ -29,7 +29,6 @@ urlpatterns = [
     path("anonymized-customers/", anonymization_views.AnonymizedCustomerView.as_view(), name="anonymized_customers"),
     # API endpoints
     path("api/decorated-users/", anonymization_views.decorated_user_list, name="decorated_user_list"),
-    path("api/role-required/", anonymization_views.role_required_view, name="role_required_view"),
     path("api/apply-rule/", anonymization_views.apply_masking_rule_ajax, name="apply_masking_rule_ajax"),
     path("api/status/", anonymization_views.anonymization_status_api, name="anonymization_status_api"),
 ]
