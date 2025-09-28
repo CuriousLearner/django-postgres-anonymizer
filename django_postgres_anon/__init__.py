@@ -17,6 +17,9 @@ For more information, see: https://github.com/CuriousLearner/django-postgres-ano
 import os
 from typing import Any, Dict
 
+import django
+from django.core.exceptions import ImproperlyConfigured
+
 __version__ = "0.1.0-alpha.1"
 __author__ = "Sanyam Khurana"
 __email__ = "sanyam@sanyamkhurana.com"
@@ -77,9 +80,6 @@ def get_version_info() -> Dict[str, Any]:
 def check_dependencies():
     """Check if required dependencies are available."""
     import sys
-
-    import django
-    from django.core.exceptions import ImproperlyConfigured
 
     # Check Python version
     if sys.version_info < PACKAGE_CONFIG["min_python_version"]:

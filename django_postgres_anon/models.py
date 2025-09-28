@@ -3,6 +3,7 @@ import os
 from typing import Optional
 
 import yaml
+from django.conf import settings
 from django.db import DatabaseError, OperationalError, connection, models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -195,8 +196,6 @@ def handle_rule_disabled(sender, instance, created, **kwargs):
 
     # Skip if we're in a test environment with fake table names
     import sys
-
-    from django.conf import settings
 
     # Check various test indicators
     if (hasattr(settings, "TESTING") and settings.TESTING) or "test" in sys.argv or "pytest" in sys.modules:

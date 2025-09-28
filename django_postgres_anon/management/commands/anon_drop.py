@@ -2,6 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
+from django.db.models import Count
 
 from django_postgres_anon.models import MaskedRole, MaskingPreset, MaskingRule
 from django_postgres_anon.utils import create_operation_log, generate_remove_anonymization_sql, validate_anon_extension
@@ -213,7 +214,6 @@ class Command(BaseCommand):
     def _remove_masking_presets(self, options):
         """Remove masking presets that have no rules"""
         # Find presets with no rules - use annotate to avoid distinct() issue with delete()
-        from django.db.models import Count
 
         empty_presets = MaskingPreset.objects.annotate(rules_count=Count("rules")).filter(rules_count=0)
 

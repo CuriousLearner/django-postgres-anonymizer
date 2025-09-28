@@ -4,7 +4,7 @@ from typing import Callable
 from django.db import DatabaseError, OperationalError, connection
 from django.http import HttpRequest, HttpResponse
 
-from django_postgres_anon.config import anon_config
+from django_postgres_anon.config import get_anon_setting
 from django_postgres_anon.utils import reset_role, switch_to_role
 
 logger = logging.getLogger(__name__)
@@ -27,16 +27,16 @@ class AnonRoleMiddleware:
             # Check if user should have data masked - defensive against user access issues
             try:
                 should_mask = (
-                    anon_config.enabled
+                    get_anon_setting("ENABLED")
                     and request.user.is_authenticated
-                    and request.user.groups.filter(name=anon_config.masked_group).exists()
+                    and request.user.groups.filter(name=get_anon_setting("MASKED_GROUP")).exists()
                 )
             except Exception:
                 # If there's any issue with user/group access, default to no masking
                 should_mask = False
 
             if should_mask:
-                masked_role = anon_config.default_masked_role
+                masked_role = get_anon_setting("DEFAULT_MASKED_ROLE")
 
                 if switch_to_role(masked_role, auto_create=True):
                     used_mask = True

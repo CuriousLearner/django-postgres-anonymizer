@@ -56,10 +56,17 @@ class TestMiddlewareRoleSwitching:
 
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
-                with patch("django_postgres_anon.middleware.anon_config") as mock_config:
-                    mock_config.enabled = True
-                    mock_config.masked_group = "view_masked_data"
-                    mock_config.default_masked_role = "masked_reader"
+                with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
+
+                    def mock_setting(key):
+                        settings_map = {
+                            "ENABLED": True,
+                            "MASKED_GROUP": "view_masked_data",
+                            "DEFAULT_MASKED_ROLE": "masked_reader",
+                        }
+                        return settings_map.get(key)
+
+                    mock_get_setting.side_effect = mock_setting
                     mock_switch.return_value = True
                     mock_reset.return_value = True
 
@@ -78,10 +85,17 @@ class TestMiddlewareRoleSwitching:
 
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
-                with patch("django_postgres_anon.middleware.anon_config") as mock_config:
-                    mock_config.enabled = True
-                    mock_config.masked_group = "view_masked_data"
-                    mock_config.default_masked_role = "masked_reader"
+                with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
+
+                    def mock_setting(key):
+                        settings_map = {
+                            "ENABLED": True,
+                            "MASKED_GROUP": "view_masked_data",
+                            "DEFAULT_MASKED_ROLE": "masked_reader",
+                        }
+                        return settings_map.get(key)
+
+                    mock_get_setting.side_effect = mock_setting
                     mock_switch.return_value = False
 
                     response = middleware(request)
@@ -102,12 +116,19 @@ class TestMiddlewareRoleSwitching:
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
                 with patch("django.db.connection.cursor") as mock_cursor:
-                    with patch("django_postgres_anon.middleware.anon_config") as mock_config:
+                    with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
                         cursor_mock = Mock()
                         mock_cursor.return_value.__enter__.return_value = cursor_mock
-                        mock_config.enabled = True
-                        mock_config.masked_group = "view_masked_data"
-                        mock_config.default_masked_role = "masked_reader"
+
+                        def mock_setting(key):
+                            settings_map = {
+                                "ENABLED": True,
+                                "MASKED_GROUP": "view_masked_data",
+                                "DEFAULT_MASKED_ROLE": "masked_reader",
+                            }
+                            return settings_map.get(key)
+
+                        mock_get_setting.side_effect = mock_setting
                         mock_switch.return_value = True
                         mock_reset.return_value = True
 
@@ -126,13 +147,20 @@ class TestMiddlewareRoleSwitching:
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
                 with patch("django.db.connection.cursor") as mock_cursor:
-                    with patch("django_postgres_anon.middleware.anon_config") as mock_config:
+                    with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
                         cursor_mock = Mock()
                         cursor_mock.execute.side_effect = DatabaseError("Search path error")
                         mock_cursor.return_value.__enter__.return_value = cursor_mock
-                        mock_config.enabled = True
-                        mock_config.masked_group = "view_masked_data"
-                        mock_config.default_masked_role = "masked_reader"
+
+                        def mock_setting(key):
+                            settings_map = {
+                                "ENABLED": True,
+                                "MASKED_GROUP": "view_masked_data",
+                                "DEFAULT_MASKED_ROLE": "masked_reader",
+                            }
+                            return settings_map.get(key)
+
+                        mock_get_setting.side_effect = mock_setting
                         mock_switch.return_value = True
                         mock_reset.return_value = True
 
@@ -151,12 +179,19 @@ class TestMiddlewareRoleSwitching:
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
                 with patch("django.db.connection.cursor") as mock_cursor:
-                    with patch("django_postgres_anon.middleware.anon_config") as mock_config:
+                    with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
                         cursor_mock = Mock()
                         mock_cursor.return_value.__enter__.return_value = cursor_mock
-                        mock_config.enabled = True
-                        mock_config.masked_group = "view_masked_data"
-                        mock_config.default_masked_role = "masked_reader"
+
+                        def mock_setting(key):
+                            settings_map = {
+                                "ENABLED": True,
+                                "MASKED_GROUP": "view_masked_data",
+                                "DEFAULT_MASKED_ROLE": "masked_reader",
+                            }
+                            return settings_map.get(key)
+
+                        mock_get_setting.side_effect = mock_setting
                         mock_switch.return_value = True
                         mock_reset.return_value = True
 
@@ -175,10 +210,17 @@ class TestMiddlewareRoleSwitching:
 
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
-                with patch("django_postgres_anon.middleware.anon_config") as mock_config:
-                    mock_config.enabled = True
-                    mock_config.masked_group = "view_masked_data"
-                    mock_config.default_masked_role = "masked_reader"
+                with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
+
+                    def mock_setting(key):
+                        settings_map = {
+                            "ENABLED": True,
+                            "MASKED_GROUP": "view_masked_data",
+                            "DEFAULT_MASKED_ROLE": "masked_reader",
+                        }
+                        return settings_map.get(key)
+
+                    mock_get_setting.side_effect = mock_setting
                     mock_switch.return_value = True
                     mock_reset.return_value = False  # Reset fails
 
@@ -199,14 +241,21 @@ class TestMiddlewareRoleSwitching:
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
                 with patch("django.db.connection.cursor") as mock_cursor:
-                    with patch("django_postgres_anon.middleware.anon_config") as mock_config:
+                    with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
                         cursor_mock = Mock()
                         # First call (set mask path) succeeds, second call (reset path) fails
                         cursor_mock.execute.side_effect = [None, OperationalError("Reset path error")]
                         mock_cursor.return_value.__enter__.return_value = cursor_mock
-                        mock_config.enabled = True
-                        mock_config.masked_group = "view_masked_data"
-                        mock_config.default_masked_role = "masked_reader"
+
+                        def mock_setting(key):
+                            settings_map = {
+                                "ENABLED": True,
+                                "MASKED_GROUP": "view_masked_data",
+                                "DEFAULT_MASKED_ROLE": "masked_reader",
+                            }
+                            return settings_map.get(key)
+
+                        mock_get_setting.side_effect = mock_setting
                         mock_switch.return_value = True
                         mock_reset.return_value = True
 
@@ -225,10 +274,17 @@ class TestMiddlewareRoleSwitching:
 
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
-                with patch("django_postgres_anon.middleware.anon_config") as mock_config:
-                    mock_config.enabled = True
-                    mock_config.masked_group = "view_masked_data"
-                    mock_config.default_masked_role = "masked_reader"
+                with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
+
+                    def mock_setting(key):
+                        settings_map = {
+                            "ENABLED": True,
+                            "MASKED_GROUP": "view_masked_data",
+                            "DEFAULT_MASKED_ROLE": "masked_reader",
+                        }
+                        return settings_map.get(key)
+
+                    mock_get_setting.side_effect = mock_setting
 
                     response = middleware(request)
 
@@ -245,10 +301,17 @@ class TestMiddlewareRoleSwitching:
 
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
-                with patch("django_postgres_anon.middleware.anon_config") as mock_config:
-                    mock_config.enabled = False  # Disabled
-                    mock_config.masked_group = "view_masked_data"
-                    mock_config.default_masked_role = "masked_reader"
+                with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
+
+                    def mock_setting(key):
+                        settings_map = {
+                            "ENABLED": False,  # Disabled
+                            "MASKED_GROUP": "view_masked_data",
+                            "DEFAULT_MASKED_ROLE": "masked_reader",
+                        }
+                        return settings_map.get(key)
+
+                    mock_get_setting.side_effect = mock_setting
 
                     response = middleware(request)
 
@@ -269,10 +332,17 @@ class TestMiddlewareRoleSwitching:
 
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
-                with patch("django_postgres_anon.middleware.anon_config") as mock_config:
-                    mock_config.enabled = True
-                    mock_config.masked_group = "view_masked_data"
-                    mock_config.default_masked_role = "masked_reader"
+                with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
+
+                    def mock_setting(key):
+                        settings_map = {
+                            "ENABLED": True,
+                            "MASKED_GROUP": "view_masked_data",
+                            "DEFAULT_MASKED_ROLE": "masked_reader",
+                        }
+                        return settings_map.get(key)
+
+                    mock_get_setting.side_effect = mock_setting
                     mock_switch.return_value = True
                     mock_reset.return_value = True
 
@@ -292,10 +362,17 @@ class TestMiddlewareRoleSwitching:
 
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
             with patch("django_postgres_anon.middleware.reset_role") as mock_reset:
-                with patch("django_postgres_anon.middleware.anon_config") as mock_config:
-                    mock_config.enabled = True
-                    mock_config.masked_group = "view_masked_data"
-                    mock_config.default_masked_role = "custom_masked_role"
+                with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
+
+                    def mock_setting(key):
+                        settings_map = {
+                            "ENABLED": True,
+                            "MASKED_GROUP": "view_masked_data",
+                            "DEFAULT_MASKED_ROLE": "custom_masked_role",
+                        }
+                        return settings_map.get(key)
+
+                    mock_get_setting.side_effect = mock_setting
                     mock_switch.return_value = True
                     mock_reset.return_value = True
 
@@ -319,10 +396,17 @@ class TestMiddlewareErrorHandling:
         request.user = user_with_masked_group
 
         with patch("django_postgres_anon.middleware.switch_to_role") as mock_switch:
-            with patch("django_postgres_anon.middleware.anon_config") as mock_config:
-                mock_config.enabled = True
-                mock_config.masked_group = "view_masked_data"
-                mock_config.default_masked_role = "masked_reader"
+            with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
+
+                def mock_setting(key):
+                    settings_map = {
+                        "ENABLED": True,
+                        "MASKED_GROUP": "view_masked_data",
+                        "DEFAULT_MASKED_ROLE": "masked_reader",
+                    }
+                    return settings_map.get(key)
+
+                mock_get_setting.side_effect = mock_setting
                 # Simulate database connection error
                 mock_switch.side_effect = DatabaseError("Database connection failed")
 
@@ -343,10 +427,17 @@ class TestMiddlewareErrorHandling:
         mock_user.groups.filter.side_effect = Exception("Group access error")
         request.user = mock_user
 
-        with patch("django_postgres_anon.middleware.anon_config") as mock_config:
-            mock_config.enabled = True
-            mock_config.masked_group = "view_masked_data"
-            mock_config.default_masked_role = "masked_reader"
+        with patch("django_postgres_anon.middleware.get_anon_setting") as mock_get_setting:
+
+            def mock_setting(key):
+                settings_map = {
+                    "ENABLED": True,
+                    "MASKED_GROUP": "view_masked_data",
+                    "DEFAULT_MASKED_ROLE": "masked_reader",
+                }
+                return settings_map.get(key)
+
+            mock_get_setting.side_effect = mock_setting
 
             response = middleware(request)
 

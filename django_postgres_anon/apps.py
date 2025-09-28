@@ -2,6 +2,7 @@ import logging
 
 from django.apps import AppConfig
 from django.conf import settings
+from django.core.management import call_command
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,6 @@ class DjangoPostgresAnonConfig(AppConfig):
 
     def _auto_init_development(self):
         """Auto-initialize anonymization in development"""
-        from django.core.management import call_command
 
         logger.info("Auto-initializing PostgreSQL Anonymizer for development")
         call_command("anon_init", verbosity=0)

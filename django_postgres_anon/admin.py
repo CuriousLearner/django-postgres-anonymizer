@@ -7,8 +7,6 @@ from django.http import HttpRequest, HttpResponse
 from django.utils.html import format_html
 
 from django_postgres_anon.admin_base import BaseAnonymizationAdmin, BaseLogAdmin
-
-# Removed constants - using inline values
 from django_postgres_anon.models import MaskedRole, MaskingLog, MaskingPreset, MaskingRule
 
 
@@ -264,6 +262,3 @@ class MaskingLogAdmin(BaseLogAdmin):
         return "-"
 
     short_details.short_description = "Details"
-
-
-# Custom admin views could be added here for dashboard functionality

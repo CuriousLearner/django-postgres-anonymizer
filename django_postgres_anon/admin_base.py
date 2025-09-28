@@ -11,28 +11,24 @@ from django.http import HttpRequest
 from django_postgres_anon.constants import (
     ADMIN_ERROR_EMOJI,
     ADMIN_WARNING_EMOJI,
+    ANON_FUNCTION_PREFIX,
+    APPLIED_COUNT_FIELD,
+    ERROR_FIELD,
+    ERRORS_FIELD,
     EXTENSION_REQUIRED_OPERATIONS,
+    MASKED_ROLE_MARK_APPLIED_METHOD,
+    MAX_ERROR_SUMMARY_COUNT,
+    MAX_ERRORS_BEFORE_ROLLBACK,
+    MAX_ERRORS_TO_SHOW,
+    MAX_RULES_TO_VALIDATE,
+    SUCCESS_FIELD,
     VALID_ADMIN_OPERATIONS,
 )
 
 # Simplified error handling
 from django_postgres_anon.utils import create_operation_log, generate_anonymization_sql, validate_anon_extension
 
-# Admin-specific constants
 logger = logging.getLogger(__name__)
-MAX_RULES_TO_VALIDATE = 100
-ANON_FUNCTION_PREFIX = "anon."
-LARGE_OPERATION_THRESHOLD = 50
-MAX_ERRORS_TO_SHOW = 5
-MAX_ERROR_SUMMARY_COUNT = 3
-MAX_ERRORS_BEFORE_ROLLBACK = 10
-
-# Field name constants for operation results
-APPLIED_COUNT_FIELD = "applied_count"
-ERRORS_FIELD = "errors"
-SUCCESS_FIELD = "success"
-ERROR_FIELD = "error"
-MASKED_ROLE_MARK_APPLIED_METHOD = "mark_applied"
 
 
 class BaseAnonymizationAdmin(admin.ModelAdmin):

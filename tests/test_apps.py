@@ -22,7 +22,7 @@ class TestDjangoAppConfig(TestCase):
         assert config.default_auto_field == "django.db.models.BigAutoField"
 
     @override_settings(ANON_AUTO_INIT=True, DEBUG=True)
-    @patch("django.core.management.call_command")
+    @patch("django_postgres_anon.apps.call_command")
     @patch("django_postgres_anon.apps.logger")
     def test_auto_init_runs_in_development_when_enabled(self, mock_logger, mock_call_command):
         """Auto-initialization runs in development when ANON_AUTO_INIT is True"""
@@ -35,7 +35,7 @@ class TestDjangoAppConfig(TestCase):
         mock_logger.info.assert_called_once_with("Auto-initializing PostgreSQL Anonymizer for development")
 
     @override_settings(ANON_AUTO_INIT=False, DEBUG=True)
-    @patch("django.core.management.call_command")
+    @patch("django_postgres_anon.apps.call_command")
     def test_auto_init_skipped_when_disabled(self, mock_call_command):
         """Auto-initialization is skipped when ANON_AUTO_INIT is False"""
         import django_postgres_anon
@@ -46,7 +46,7 @@ class TestDjangoAppConfig(TestCase):
         mock_call_command.assert_not_called()
 
     @override_settings(ANON_AUTO_INIT=True, DEBUG=False)
-    @patch("django.core.management.call_command")
+    @patch("django_postgres_anon.apps.call_command")
     def test_auto_init_skipped_in_production(self, mock_call_command):
         """Auto-initialization is skipped in production (DEBUG=False)"""
         import django_postgres_anon
@@ -57,7 +57,7 @@ class TestDjangoAppConfig(TestCase):
         mock_call_command.assert_not_called()
 
     @override_settings(ANON_AUTO_INIT=True, DEBUG=True)
-    @patch("django.core.management.call_command")
+    @patch("django_postgres_anon.apps.call_command")
     @patch("django_postgres_anon.apps.logger")
     def test_auto_init_handles_errors_gracefully(self, mock_logger, mock_call_command):
         """Auto-initialization handles errors gracefully and logs warning"""

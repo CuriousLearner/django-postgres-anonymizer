@@ -4,7 +4,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from model_bakery import baker
 
-from django_postgres_anon.config import anon_config
+from django_postgres_anon.config import get_anon_setting
 from django_postgres_anon.models import MaskedRole, MaskingLog, MaskingPreset, MaskingRule
 
 # =============================================================================
@@ -286,7 +286,9 @@ class TestAnonConfiguration:
     )
     def test_config_has_essential_properties(self, prop):
         """Configuration provides all essential settings"""
-        assert hasattr(anon_config, prop)
+        # Test that setting exists with default
+        value = get_anon_setting(prop.upper())
+        assert value is not None
 
     @pytest.mark.parametrize(
         "prop",
@@ -303,21 +305,24 @@ class TestAnonConfiguration:
     )
     def test_config_provides_sensible_defaults(self, prop):
         """Configuration has reasonable default values"""
-        value = getattr(anon_config, prop)
+        value = get_anon_setting(prop.upper())
         assert value is not None, f"Config {prop} should have a default value"
 
     def test_config_types_are_correct(self):
         """Configuration values have expected types"""
-        assert isinstance(anon_config.default_masked_role, str)
-        assert isinstance(anon_config.enabled, bool)
-        assert isinstance(anon_config.validate_functions, bool)
+        assert isinstance(get_anon_setting("DEFAULT_MASKED_ROLE"), str)
+        assert isinstance(get_anon_setting("ENABLED"), bool)
+        assert isinstance(get_anon_setting("VALIDATE_FUNCTIONS"), bool)
 
-    def test_global_config_accessibility(self):
-        """Global config instance is accessible"""
-        from django_postgres_anon.config import anon_config as global_config
+    def test_config_accessibility(self):
+        """Configuration settings are accessible"""
+        from django_postgres_anon.config import get_anon_setting
 
-        assert global_config is not None
-        assert hasattr(global_config, "default_masked_role")
+        # Test that we can access settings
+        default_role = get_anon_setting("DEFAULT_MASKED_ROLE")
+
+        assert default_role is not None
+        assert isinstance(default_role, str)
 
 
 # =============================================================================
@@ -354,7 +359,7 @@ class TestCoreIntegration:
         baker.make(MaskingRule)
 
         # Config should provide the default role name
-        default_role = anon_config.default_masked_role
+        default_role = get_anon_setting("DEFAULT_MASKED_ROLE")
         assert isinstance(default_role, str)
         assert len(default_role) > 0
 

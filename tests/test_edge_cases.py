@@ -327,7 +327,7 @@ def test_configuration_system_provides_reasonable_defaults():
     Users should be able to use the system without extensive configuration,
     with all settings having sensible default values.
     """
-    from django_postgres_anon.config import anon_config
+    from django_postgres_anon.config import get_anon_setting
 
     # Test: Access all configuration properties
     essential_properties = [
@@ -342,7 +342,7 @@ def test_configuration_system_provides_reasonable_defaults():
     ]
 
     for property_name in essential_properties:
-        value = getattr(anon_config, property_name)
+        value = get_anon_setting(property_name.upper())
 
         assert value is not None, f"Config property '{property_name}' should have a default value"
 

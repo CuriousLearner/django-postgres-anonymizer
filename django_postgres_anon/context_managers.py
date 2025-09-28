@@ -6,7 +6,7 @@ from typing import Any, Dict, Generator, Optional
 
 from django.db import connection
 
-from django_postgres_anon.config import anon_config
+from django_postgres_anon.config import get_anon_setting
 
 # ErrorHandler no longer needed
 from django_postgres_anon.models import MaskedRole
@@ -41,7 +41,7 @@ def anonymized_data(role_name: Optional[str] = None, auto_create: bool = True) -
         Exception: If role switching fails
     """
     if role_name is None:
-        role_name = anon_config.anonymized_data_role
+        role_name = get_anon_setting("ANONYMIZED_DATA_ROLE")
 
     # Initialize state tracking
     state = _initialize_context_state()
