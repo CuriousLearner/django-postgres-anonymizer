@@ -5,8 +5,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.test import TestCase
 
-from django_postgres_anon.context_managers import anonymized_data, database_role
-from django_postgres_anon.decorators import AnonymizedDataMixin, database_role_required, use_anonymized_data
+from django_postgres_anon.context_managers import anonymized_data
+from django_postgres_anon.decorators import use_anonymized_data
+from django_postgres_anon.mixins import AnonymizedDataMixin
 from django_postgres_anon.utils import (
     check_table_exists,
     create_masked_role,
@@ -506,28 +507,6 @@ class TestDatabaseRoleContext(TestCase):
     """Test database role context manager"""
 
     @patch("django_postgres_anon.context_managers.switch_to_role")
-    @patch("django_postgres_anon.context_managers.reset_role")
-    def test_switches_to_specific_role(self, mock_reset, mock_switch):
-        """Users can switch to any specific database role"""
-        mock_switch.return_value = True
-        mock_reset.return_value = True
-
-        with database_role("readonly_user"):
-            pass
-
-        mock_switch.assert_called_once_with("readonly_user", auto_create=False)
-        mock_reset.assert_called_once()
-
-    @patch("django_postgres_anon.context_managers.switch_to_role")
-    def test_raises_error_when_role_doesnt_exist(self, mock_switch):
-        """Database role raises error when role doesn't exist"""
-        mock_switch.return_value = False
-
-        with pytest.raises(RuntimeError, match="Database role 'nonexistent' does not exist"):
-            with database_role("nonexistent"):
-                pass
-
-    @patch("django_postgres_anon.context_managers.switch_to_role")
     def test_raises_error_when_role_switch_fails_in_masked_context(self, mock_switch):
         """Anonymized data context raises error when role switch fails"""
         mock_switch.return_value = False
@@ -631,20 +610,6 @@ class TestAnonymizationDecorators(TestCase):
         assert result == "result"
         mock_context.assert_called_once_with(role_name="custom_role", auto_create=True)
 
-    @patch("django_postgres_anon.context_managers.database_role")
-    def test_database_role_required_decorator(self, mock_context):
-        """Database role decorator enforces specific roles"""
-        mock_context.return_value.__enter__.return_value = None
-        mock_context.return_value.__exit__.return_value = None
-
-        @database_role_required("admin_role")
-        def admin_function():
-            return "admin_result"
-
-        result = admin_function()
-        assert result == "admin_result"
-        mock_context.assert_called_once_with("admin_role")
-
     def test_decorator_preserves_function_metadata(self):
         """Decorators preserve original function names and docstrings"""
 
@@ -660,7 +625,7 @@ class TestAnonymizationDecorators(TestCase):
 class TestAnonymizedDataMixin(TestCase):
     """Test the mixin for class-based views"""
 
-    @patch("django_postgres_anon.decorators.anonymized_data")
+    @patch("django_postgres_anon.mixins.anonymized_data")
     def test_mixin_wraps_dispatch_method(self, mock_context):
         """Mixin automatically anonymizes data for all view methods"""
         mock_context.return_value.__enter__.return_value = None
@@ -680,7 +645,7 @@ class TestAnonymizedDataMixin(TestCase):
         assert result == "view_result"
         mock_context.assert_called_once_with(role_name=None, auto_create=True)
 
-    @patch("django_postgres_anon.decorators.anonymized_data")
+    @patch("django_postgres_anon.mixins.anonymized_data")
     def test_mixin_uses_custom_role_if_specified(self, mock_context):
         """Mixin uses custom role names when specified"""
         mock_context.return_value.__enter__.return_value = None
@@ -715,8 +680,9 @@ class TestAnonymizationIntegration(TestCase):
         mock_switch.return_value = True
         mock_reset.return_value = True
 
-        with anonymized_data("role1"), database_role("role2"):
-            pass
+        with anonymized_data("role1"):
+            with anonymized_data("role2"):
+                pass
 
         # Should have switched roles and reset appropriately
         assert mock_switch.call_count >= 2

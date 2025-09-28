@@ -14,8 +14,9 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
 
-from django_postgres_anon.context_managers import anonymized_data, database_role
-from django_postgres_anon.decorators import AnonymizedDataMixin, database_role_required, use_anonymized_data
+from django_postgres_anon.context_managers import anonymized_data
+from django_postgres_anon.decorators import use_anonymized_data
+from django_postgres_anon.mixins import AnonymizedDataMixin
 from django_postgres_anon.models import MaskingPreset, MaskingRule
 from django_postgres_anon.utils import suggest_anonymization_functions, validate_function_syntax
 
@@ -37,10 +38,9 @@ def context_manager_demo(request: HttpRequest) -> HttpResponse:
     }
 
     try:
-        # Normal data access - explicitly use default role to bypass middleware
-        with database_role("sanyamkhurana"):  # Use default role to get unmasked data
-            normal_users = list(User.objects.values("username", "email", "first_name", "last_name")[:5])
-            context["normal_data"] = normal_users
+        # Normal data access - direct query without role switching
+        normal_users = list(User.objects.values("username", "email", "first_name", "last_name")[:5])
+        context["normal_data"] = normal_users
 
         # Using anonymized_data context manager
         try:
@@ -51,14 +51,14 @@ def context_manager_demo(request: HttpRequest) -> HttpResponse:
             logger.warning(f"Anonymized data context manager failed: {e}")
             context["anonymized_data"] = [{"error": f"Context manager failed: {e}"}]
 
-        # Using database_role context manager
+        # Using anonymized_data with specific role
         try:
-            with database_role("masked_reader"):
+            with anonymized_data("masked_reader"):
                 role_users = list(User.objects.values("username", "email", "first_name", "last_name")[:5])
                 context["role_switched_data"] = role_users
         except Exception as e:
-            logger.warning(f"Database role context manager failed: {e}")
-            context["role_switched_data"] = [{"error": f"Role switch failed: {e}"}]
+            logger.warning(f"Anonymized data with custom role failed: {e}")
+            context["role_switched_data"] = [{"error": f"Custom role failed: {e}"}]
 
     except Exception as e:
         logger.error(f"Context manager demo error: {e}")
@@ -77,26 +77,6 @@ def decorated_user_list(request: HttpRequest) -> JsonResponse:
         )
     except Exception as e:
         logger.error(f"Decorated user list error: {e}")
-        return JsonResponse({"error": str(e)}, status=500)
-
-
-@database_role_required("masked_reader")
-def role_required_view(request: HttpRequest) -> JsonResponse:
-    """View using the @database_role_required decorator"""
-    try:
-        customers = Customer.objects.select_related("user").values(
-            "user__username", "user__email", "phone", "ssn", "annual_income"
-        )[:5]
-
-        return JsonResponse(
-            {
-                "message": "Data accessed with @database_role_required decorator",
-                "customers": list(customers),
-                "required_role": "masked_reader",
-            }
-        )
-    except Exception as e:
-        logger.error(f"Role required view error: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
 

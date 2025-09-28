@@ -7,12 +7,8 @@ from typing import Any, Dict, Generator, Optional
 from django.db import connection
 
 from django_postgres_anon.config import get_anon_setting
-
-# ErrorHandler no longer needed
 from django_postgres_anon.models import MaskedRole
 from django_postgres_anon.utils import reset_role, switch_to_role
-
-# Simplified error handling - no decorators needed
 
 logger = logging.getLogger(__name__)
 
@@ -145,33 +141,3 @@ def _restore_isolation_level(isolation_level: str) -> None:
     """Restore the original transaction isolation level."""
     with connection.cursor() as cursor:
         cursor.execute(f"SET transaction_isolation = '{isolation_level}'")
-
-
-@contextlib.contextmanager
-def database_role(role_name: str):
-    """
-    Lower-level context manager for switching to any database role.
-
-    Args:
-        role_name: Name of the database role to switch to
-
-    Example:
-        >>> with database_role('readonly_user'):
-        ...     # All queries run as readonly_user
-        ...     data = MyModel.objects.all()
-    """
-    role_switched = False
-
-    try:
-        connection.ensure_connection()
-
-        if switch_to_role(role_name, auto_create=False):
-            role_switched = True
-        else:
-            raise RuntimeError(f"Database role '{role_name}' does not exist")
-
-        yield
-
-    finally:
-        if role_switched:
-            reset_role()

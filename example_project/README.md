@@ -9,7 +9,7 @@ This example project demonstrates how to integrate and use django-postgres-anony
 - **Presets**: Loading and using pre-built anonymization presets
 - **Admin Integration**: Django admin interface with anonymization actions
 - **Interactive Demo**: Web interface to explore anonymization features
-- **Context Managers**: Temporary anonymized data access with `anonymized_data()` and `database_role()`
+- **Context Managers**: Temporary anonymized data access with `anonymized_data()`
 - **Decorators**: Function and class-based view decorators for automatic anonymization
 - **Function Validation**: Real-time validation and testing of anonymization functions
 - **Data Comparison**: Side-by-side comparison of original vs anonymized data

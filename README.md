@@ -64,7 +64,7 @@ def api_endpoint(request):
     return JsonResponse({'users': list(User.objects.values())})
 
 # Class-Based View Mixin
-from django_postgres_anon.decorators import AnonymizedDataMixin
+from django_postgres_anon.mixins import AnonymizedDataMixin
 
 class ReportView(AnonymizedDataMixin, ListView):
     model = SensitiveModel  # ← All queries automatically anonymized!
@@ -89,8 +89,8 @@ POSTGRES_ANON = {'MASKED_GROUP': 'analysts'}
 
 ### 🎭 **Dynamic Data Access**
 
-- 🎯 **Context Managers** - `anonymized_data()` and `database_role()` for temporary role switching
-- 🎨 **Decorators** - `@use_anonymized_data` and `@database_role_required` for view-level control
+- 🎯 **Context Managers** - `anonymized_data()` for temporary role switching
+- 🎨 **Decorators** - `@use_anonymized_data` for view-level control
 - 🧩 **Class-Based Mixins** - `AnonymizedDataMixin` for automatic anonymization in CBVs
 - 🔀 **Smart Middleware** - Group-based automatic role switching for seamless user experience
 
@@ -275,7 +275,7 @@ python manage.py anon_drop [--confirm]
 #### Context Managers
 
 ```python
-from django_postgres_anon.context_managers import anonymized_data, database_role
+from django_postgres_anon.context_managers import anonymized_data
 
 # Use anonymized data in a view
 def sensitive_report(request):
@@ -289,17 +289,12 @@ def custom_report(request):
         data = SensitiveModel.objects.all()
         return JsonResponse({'data': list(data.values())})
 
-# Switch to any database role
-def read_only_operation():
-    with database_role('readonly_user'):
-        # All queries run as readonly_user
-        return MyModel.objects.all()
 ```
 
 #### Decorators
 
 ```python
-from django_postgres_anon.decorators import use_anonymized_data, database_role_required
+from django_postgres_anon.decorators import use_anonymized_data
 from django.utils.decorators import method_decorator
 
 # Function-based views
@@ -311,10 +306,6 @@ def api_endpoint(request):
 def custom_api_endpoint(request):
     return JsonResponse({'data': list(SensitiveModel.objects.values())})
 
-# Require specific database role
-@database_role_required('readonly_user')
-def read_only_operation():
-    return MyModel.objects.all()
 
 # Class-based views with method decorator
 class SensitiveDataView(View):
@@ -327,7 +318,7 @@ class SensitiveDataView(View):
 #### Class-Based View Mixins
 
 ```python
-from django_postgres_anon.decorators import AnonymizedDataMixin
+from django_postgres_anon.mixins import AnonymizedDataMixin
 from django.views.generic import ListView, View
 
 # Automatic anonymization for ListView
@@ -672,8 +663,6 @@ with anonymized_data():                    # Use default masked role
 with anonymized_data('custom_role'):       # Use specific role
 with anonymized_data('role', False):       # Don't auto-create role
 
-# database_role(role_name)
-with database_role('readonly_user'):       # Switch to any database role
 ```
 
 ### Decorators
@@ -685,12 +674,7 @@ with database_role('readonly_user'):       # Switch to any database role
 @use_anonymized_data('custom_role')        # Use specific role
 @use_anonymized_data('role', False)        # Don't auto-create role
 
-# @database_role_required(role_name)
-@database_role_required('readonly_user')   # Require specific role
 
-# Aliases for semantic clarity
-@anonymized_view                           # Alias for @use_anonymized_data
-@masked_data                               # Alternative alias
 ```
 
 ### Mixins

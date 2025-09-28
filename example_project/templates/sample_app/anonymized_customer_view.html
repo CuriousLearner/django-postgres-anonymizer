@@ -223,7 +223,7 @@
             <div class="card-body">
                 <h6>Class-based View with Mixin</h6>
                 <div style="position: relative;">
-                    <pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 16px; margin: 0; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px; line-height: 1.45;"><code><span style="color: #d73a49; font-weight: 600;">from</span> django_postgres_anon.decorators <span style="color: #d73a49; font-weight: 600;">import</span> AnonymizedDataMixin
+                    <pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 16px; margin: 0; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px; line-height: 1.45;"><code><span style="color: #d73a49; font-weight: 600;">from</span> django_postgres_anon.mixins <span style="color: #d73a49; font-weight: 600;">import</span> AnonymizedDataMixin
 <span style="color: #d73a49; font-weight: 600;">from</span> django.views.generic <span style="color: #d73a49; font-weight: 600;">import</span> TemplateView
 
 <span style="color: #d73a49; font-weight: 600;">class</span> <span style="color: #6f42c1;">AnonymizedCustomerView</span>(<span style="color: #6f42c1;">AnonymizedDataMixin</span>, <span style="color: #6f42c1;">TemplateView</span>):

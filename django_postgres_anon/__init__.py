@@ -5,8 +5,8 @@ This package provides:
 - Django models for managing anonymization rules and presets
 - Management commands for initializing, applying, and managing anonymization
 - Middleware for dynamic role switching
-- Context managers for temporary role switching (anonymized_data, database_role)
-- Decorators for automatic anonymization in views/functions (use_anonymized_data, database_role_required)
+- Context managers for temporary role switching (anonymized_data)
+- Decorators for automatic anonymization in views/functions (use_anonymized_data)
 - Class-based view mixins for anonymized data access (AnonymizedDataMixin)
 - Utilities for database schema introspection
 - Pre-built presets for common use cases
@@ -157,8 +157,6 @@ try:
                 "MaskingPreset",
                 "MaskingRule",
                 "anonymized_data",
-                "database_role",
-                "database_role_required",
                 "get_table_columns",
                 "use_anonymized_data",
                 "validate_function_syntax",
