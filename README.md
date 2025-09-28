@@ -71,7 +71,7 @@ class ReportView(AnonymizedDataMixin, ListView):
 
 # Automatic Group-Based (Middleware)
 # Users in 'analysts' group see anonymized data everywhere
-POSTGRES_ANON = {'MASKED_GROUP': 'analysts'}
+POSTGRES_ANON = {'MASKED_GROUPS': ['analysts', 'qa_team']}
 ```
 
 **Installation**: `pip install django-postgres-anonymizer` → Add to `INSTALLED_APPS` → `python manage.py migrate`
@@ -351,7 +351,7 @@ MIDDLEWARE = [
 
 POSTGRES_ANON = {
     'ENABLED': True,
-    'MASKED_GROUP': 'analysts',  # Users in this group see anonymized data
+    'MASKED_GROUPS': ['analysts', 'qa_team'],  # Users in these groups see anonymized data
     'DEFAULT_MASKED_ROLE': 'masked_reader',
 }
 ```
@@ -781,7 +781,7 @@ Configuration follows [12-factor app principles](https://12factor.net/config). S
    ```bash
    export POSTGRES_ANON_ENABLED=true
    export POSTGRES_ANON_DEFAULT_MASKED_ROLE=masked_reader
-   export POSTGRES_ANON_MASKED_GROUP=view_masked_data
+   export POSTGRES_ANON_MASKED_GROUPS=analysts,data_scientists,external_auditors
    export POSTGRES_ANON_AUTO_APPLY_RULES=false
    export POSTGRES_ANON_VALIDATE_FUNCTIONS=true
    export POSTGRES_ANON_ALLOW_CUSTOM_FUNCTIONS=false
@@ -795,7 +795,7 @@ Configuration follows [12-factor app principles](https://12factor.net/config). S
        # Core settings
        'DEFAULT_MASKED_ROLE': 'masked_reader',     # Default role for anonymization
        'ANONYMIZED_DATA_ROLE': 'masked_reader',    # Role for anonymized_data()
-       'MASKED_GROUP': 'masked_users',             # Django group for middleware
+       'MASKED_GROUPS': ['analysts', 'data_scientists', 'external_auditors'],  # Django groups for middleware
 
        # Behavior settings
        'ENABLED': True,                            # Enable anonymization features

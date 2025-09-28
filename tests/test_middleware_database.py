@@ -61,7 +61,7 @@ class TestMiddlewareRoleSwitching:
                     def mock_setting(key):
                         settings_map = {
                             "ENABLED": True,
-                            "MASKED_GROUP": "view_masked_data",
+                            "MASKED_GROUPS": ["view_masked_data"],
                             "DEFAULT_MASKED_ROLE": "masked_reader",
                         }
                         return settings_map.get(key)
@@ -90,7 +90,7 @@ class TestMiddlewareRoleSwitching:
                     def mock_setting(key):
                         settings_map = {
                             "ENABLED": True,
-                            "MASKED_GROUP": "view_masked_data",
+                            "MASKED_GROUPS": ["view_masked_data"],
                             "DEFAULT_MASKED_ROLE": "masked_reader",
                         }
                         return settings_map.get(key)
@@ -123,7 +123,7 @@ class TestMiddlewareRoleSwitching:
                         def mock_setting(key):
                             settings_map = {
                                 "ENABLED": True,
-                                "MASKED_GROUP": "view_masked_data",
+                                "MASKED_GROUPS": ["view_masked_data"],
                                 "DEFAULT_MASKED_ROLE": "masked_reader",
                             }
                             return settings_map.get(key)
@@ -155,7 +155,7 @@ class TestMiddlewareRoleSwitching:
                         def mock_setting(key):
                             settings_map = {
                                 "ENABLED": True,
-                                "MASKED_GROUP": "view_masked_data",
+                                "MASKED_GROUPS": ["view_masked_data"],
                                 "DEFAULT_MASKED_ROLE": "masked_reader",
                             }
                             return settings_map.get(key)
@@ -186,7 +186,7 @@ class TestMiddlewareRoleSwitching:
                         def mock_setting(key):
                             settings_map = {
                                 "ENABLED": True,
-                                "MASKED_GROUP": "view_masked_data",
+                                "MASKED_GROUPS": ["view_masked_data"],
                                 "DEFAULT_MASKED_ROLE": "masked_reader",
                             }
                             return settings_map.get(key)
@@ -215,7 +215,7 @@ class TestMiddlewareRoleSwitching:
                     def mock_setting(key):
                         settings_map = {
                             "ENABLED": True,
-                            "MASKED_GROUP": "view_masked_data",
+                            "MASKED_GROUPS": ["view_masked_data"],
                             "DEFAULT_MASKED_ROLE": "masked_reader",
                         }
                         return settings_map.get(key)
@@ -250,7 +250,7 @@ class TestMiddlewareRoleSwitching:
                         def mock_setting(key):
                             settings_map = {
                                 "ENABLED": True,
-                                "MASKED_GROUP": "view_masked_data",
+                                "MASKED_GROUPS": ["view_masked_data"],
                                 "DEFAULT_MASKED_ROLE": "masked_reader",
                             }
                             return settings_map.get(key)
@@ -279,7 +279,7 @@ class TestMiddlewareRoleSwitching:
                     def mock_setting(key):
                         settings_map = {
                             "ENABLED": True,
-                            "MASKED_GROUP": "view_masked_data",
+                            "MASKED_GROUPS": ["view_masked_data"],
                             "DEFAULT_MASKED_ROLE": "masked_reader",
                         }
                         return settings_map.get(key)
@@ -306,7 +306,7 @@ class TestMiddlewareRoleSwitching:
                     def mock_setting(key):
                         settings_map = {
                             "ENABLED": False,  # Disabled
-                            "MASKED_GROUP": "view_masked_data",
+                            "MASKED_GROUPS": ["view_masked_data"],
                             "DEFAULT_MASKED_ROLE": "masked_reader",
                         }
                         return settings_map.get(key)
@@ -337,7 +337,7 @@ class TestMiddlewareRoleSwitching:
                     def mock_setting(key):
                         settings_map = {
                             "ENABLED": True,
-                            "MASKED_GROUP": "view_masked_data",
+                            "MASKED_GROUPS": ["view_masked_data"],
                             "DEFAULT_MASKED_ROLE": "masked_reader",
                         }
                         return settings_map.get(key)
@@ -367,7 +367,7 @@ class TestMiddlewareRoleSwitching:
                     def mock_setting(key):
                         settings_map = {
                             "ENABLED": True,
-                            "MASKED_GROUP": "view_masked_data",
+                            "MASKED_GROUPS": ["view_masked_data"],
                             "DEFAULT_MASKED_ROLE": "custom_masked_role",
                         }
                         return settings_map.get(key)
@@ -401,7 +401,7 @@ class TestMiddlewareErrorHandling:
                 def mock_setting(key):
                     settings_map = {
                         "ENABLED": True,
-                        "MASKED_GROUP": "view_masked_data",
+                        "MASKED_GROUPS": ["view_masked_data"],
                         "DEFAULT_MASKED_ROLE": "masked_reader",
                     }
                     return settings_map.get(key)
@@ -432,7 +432,7 @@ class TestMiddlewareErrorHandling:
             def mock_setting(key):
                 settings_map = {
                     "ENABLED": True,
-                    "MASKED_GROUP": "view_masked_data",
+                    "MASKED_GROUPS": ["view_masked_data"],
                     "DEFAULT_MASKED_ROLE": "masked_reader",
                 }
                 return settings_map.get(key)

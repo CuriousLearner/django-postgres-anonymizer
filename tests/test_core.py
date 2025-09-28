@@ -275,7 +275,7 @@ class TestAnonConfiguration:
         "prop",
         [
             "default_masked_role",
-            "masked_group",
+            "masked_groups",
             "anonymized_data_role",
             "enabled",
             "auto_apply_rules",
@@ -294,7 +294,7 @@ class TestAnonConfiguration:
         "prop",
         [
             "default_masked_role",
-            "masked_group",
+            "masked_groups",
             "anonymized_data_role",
             "enabled",
             "auto_apply_rules",

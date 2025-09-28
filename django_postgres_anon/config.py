@@ -13,7 +13,7 @@ def get_setting(key: str, default=None):
 # Default values (moved from constants.py to keep config self-contained)
 DEFAULTS = {
     "DEFAULT_MASKED_ROLE": "masked_reader",
-    "MASKED_GROUP": "view_masked_data",
+    "MASKED_GROUPS": ["view_masked_data"],
     "ANONYMIZED_DATA_ROLE": "masked_reader",
     "ENABLED": False,
     "AUTO_APPLY_RULES": False,
@@ -25,7 +25,7 @@ DEFAULTS = {
 # Environment variable mappings (12-factor compliant)
 ENV_VAR_MAPPING = {
     "DEFAULT_MASKED_ROLE": "POSTGRES_ANON_DEFAULT_MASKED_ROLE",
-    "MASKED_GROUP": "POSTGRES_ANON_MASKED_GROUP",
+    "MASKED_GROUPS": "POSTGRES_ANON_MASKED_GROUPS",
     "ANONYMIZED_DATA_ROLE": "POSTGRES_ANON_ANONYMIZED_DATA_ROLE",
     "ENABLED": "POSTGRES_ANON_ENABLED",
     "AUTO_APPLY_RULES": "POSTGRES_ANON_AUTO_APPLY_RULES",
@@ -49,6 +49,9 @@ def get_anon_setting(key: str):
         # Handle boolean conversion for known boolean settings
         if key in ["ENABLED", "AUTO_APPLY_RULES", "VALIDATE_FUNCTIONS", "ALLOW_CUSTOM_FUNCTIONS", "ENABLE_LOGGING"]:
             return _parse_env_bool(env_value)
+        # Handle comma-separated groups
+        if key == "MASKED_GROUPS":
+            return [group.strip() for group in env_value.split(",") if group.strip()]
         return env_value
 
     # Fall back to Django settings

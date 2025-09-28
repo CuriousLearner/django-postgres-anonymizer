@@ -67,7 +67,11 @@ class TestMiddlewareWithRealDatabase:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_processes_request_with_real_db(
         self, initialized_extension, request_factory, simple_get_response, user_with_masked_group
@@ -86,7 +90,11 @@ class TestMiddlewareWithRealDatabase:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_with_user_without_group(
         self, initialized_extension, request_factory, simple_get_response, user_without_masked_group
@@ -106,7 +114,7 @@ class TestMiddlewareWithRealDatabase:
     @override_settings(
         POSTGRES_ANON={
             "ENABLED": False,
-            "MASKED_GROUP": "view_masked_data",
+            "MASKED_GROUPS": ["view_masked_data"],
             "DEFAULT_MASKED_ROLE": "test_masked_reader",
         }
     )
@@ -141,7 +149,11 @@ class TestMiddlewareWithRealDatabase:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_handles_database_errors_gracefully(
         self, request_factory, simple_get_response, user_with_masked_group
@@ -160,7 +172,11 @@ class TestMiddlewareWithRealDatabase:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_with_get_response_exception(
         self, initialized_extension, request_factory, user_with_masked_group
@@ -180,7 +196,11 @@ class TestMiddlewareWithRealDatabase:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_preserves_request_attributes(
         self, initialized_extension, request_factory, user_with_masked_group
@@ -207,7 +227,11 @@ class TestMiddlewareWithRealDatabase:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_with_multiple_requests(
         self, initialized_extension, request_factory, simple_get_response, user_with_masked_group
@@ -227,7 +251,11 @@ class TestMiddlewareWithRealDatabase:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_with_custom_response(self, initialized_extension, request_factory, user_with_masked_group):
         """Test middleware returns custom response unchanged"""
@@ -268,7 +296,11 @@ class TestMiddlewareErrorHandling:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_handles_user_group_errors(self, request_factory, simple_get_response):
         """Test middleware handles user group access errors"""
@@ -302,7 +334,11 @@ class TestMiddlewareErrorHandling:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_performance_with_real_db(
         self, initialized_extension, request_factory, simple_get_response, user_with_masked_group
@@ -328,7 +364,11 @@ class TestMiddlewareErrorHandling:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_with_different_user_types(self, initialized_extension, request_factory, simple_get_response):
         """Test middleware with different types of users"""
@@ -365,7 +405,11 @@ class TestMiddlewareIntegration:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_with_session_data(
         self, initialized_extension, request_factory, simple_get_response, user_with_masked_group
@@ -401,7 +445,11 @@ class TestMiddlewareIntegration:
 
     @pytest.mark.django_db(transaction=True)
     @override_settings(
-        POSTGRES_ANON={"ENABLED": True, "MASKED_GROUP": "view_masked_data", "DEFAULT_MASKED_ROLE": "test_masked_reader"}
+        POSTGRES_ANON={
+            "ENABLED": True,
+            "MASKED_GROUPS": ["view_masked_data"],
+            "DEFAULT_MASKED_ROLE": "test_masked_reader",
+        }
     )
     def test_middleware_thread_safety(
         self, initialized_extension, request_factory, simple_get_response, user_with_masked_group

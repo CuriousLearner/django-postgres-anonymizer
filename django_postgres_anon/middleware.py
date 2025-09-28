@@ -14,7 +14,7 @@ class AnonRoleMiddleware:
     """
     Middleware for dynamic role switching based on user permissions.
 
-    Users in the ANON_MASKED_GROUP will see anonymized data automatically.
+    Users in any of the ANON_MASKED_GROUPS will see anonymized data automatically.
     """
 
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
@@ -26,10 +26,11 @@ class AnonRoleMiddleware:
         try:
             # Check if user should have data masked - defensive against user access issues
             try:
+                masked_groups = get_anon_setting("MASKED_GROUPS")
                 should_mask = (
                     get_anon_setting("ENABLED")
                     and request.user.is_authenticated
-                    and request.user.groups.filter(name=get_anon_setting("MASKED_GROUP")).exists()
+                    and request.user.groups.filter(name__in=masked_groups).exists()
                 )
             except Exception:
                 # If there's any issue with user/group access, default to no masking

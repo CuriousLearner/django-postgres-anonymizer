@@ -332,7 +332,7 @@ def test_configuration_system_provides_reasonable_defaults():
     # Test: Access all configuration properties
     essential_properties = [
         "default_masked_role",
-        "masked_group",
+        "masked_groups",
         "anonymized_data_role",
         "enabled",
         "auto_apply_rules",

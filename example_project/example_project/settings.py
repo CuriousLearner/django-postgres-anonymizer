@@ -145,7 +145,7 @@ POSTGRES_ANON = {
     "ALLOW_CUSTOM_FUNCTIONS": os.getenv("ANON_ALLOW_CUSTOM_FUNCTIONS", "False").lower() in ("true", "1", "yes"),
     "ENABLE_LOGGING": os.getenv("ANON_ENABLE_LOGGING", "True").lower() in ("true", "1", "yes"),
     "DEFAULT_MASKED_ROLE": os.getenv("ANON_DEFAULT_MASKED_ROLE", "masked_reader"),
-    "MASKED_GROUP": os.getenv("ANON_MASKED_GROUP", "view_masked_data"),
+    "MASKED_GROUPS": os.getenv("ANON_MASKED_GROUPS", "view_masked_data,analysts,qa_team").split(","),
     "ANONYMIZED_DATA_ROLE": os.getenv("ANONYMIZED_DATA_ROLE", "masked_reader"),
 }
 

@@ -103,15 +103,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Django PostgreSQL Anonymizer Settings
-DJANGO_POSTGRES_ANON = {
+POSTGRES_ANON = {
     "DEFAULT_MASKED_ROLE": "test_masked_reader",
+    "MASKED_GROUPS": ["view_masked_data"],
+    "ANONYMIZED_DATA_ROLE": "test_masked_reader",
+    "ENABLED": True,
     "AUTO_APPLY_RULES": False,
-    "DEFAULT_PRESET": None,
-    "ENABLE_LOGGING": True,
     "VALIDATE_FUNCTIONS": True,
     "ALLOW_CUSTOM_FUNCTIONS": False,
-    "BATCH_SIZE": 100,
-    "USE_TRANSACTIONS": True,
+    "ENABLE_LOGGING": True,
 }
 
 # Logging configuration for testing
