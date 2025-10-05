@@ -101,7 +101,6 @@ except Exception as e:
 # settings.py - Production configuration
 POSTGRES_ANON = {
     'ENABLED': True,
-    'AUTO_APPLY_RULES': False,        # Never auto-apply in production
     'VALIDATE_FUNCTIONS': True,       # Always validate functions
     'ALLOW_CUSTOM_FUNCTIONS': False,  # Restrict to anon namespace
     'ENABLE_LOGGING': True,           # Full audit trail
@@ -216,11 +215,10 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 ``` bash
 # Development
 export POSTGRES_ANON_ALLOW_CUSTOM_FUNCTIONS=true
-export POSTGRES_ANON_AUTO_APPLY_RULES=true
 
 # Production
 export POSTGRES_ANON_ALLOW_CUSTOM_FUNCTIONS=false
-export POSTGRES_ANON_AUTO_APPLY_RULES=false
+export POSTGRES_ANON_VALIDATE_FUNCTIONS=true
 ```
 
 **2. Access Control:**

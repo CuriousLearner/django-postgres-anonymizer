@@ -33,7 +33,6 @@ Defines anonymization rules for database columns.
 * ``column_name`` - Column to anonymize
 * ``function_expr`` - PostgreSQL Anonymizer function (e.g., ``anon.fake_email()``)
 * ``enabled`` - Whether rule is active
-* ``priority`` - Execution order (lower runs first)
 
 MaskingPreset
 ~~~~~~~~~~~~~
@@ -71,12 +70,48 @@ Audit trail for anonymization operations.
 * ``details`` - Additional metadata (JSON)
 * ``duration`` - Operation duration
 
+Configuration
+-------------
+
+get_anon_setting
+~~~~~~~~~~~~~~~~
+
+Get a configuration setting value with environment variable support.
+
+.. code-block:: python
+
+   from django_postgres_anon.config import get_anon_setting
+
+   # Get individual settings
+   enabled = get_anon_setting('ENABLED')
+   masked_groups = get_anon_setting('MASKED_GROUPS')
+   validate = get_anon_setting('VALIDATE_FUNCTIONS')
+
+Available settings: ``ENABLED``, ``MASKED_GROUPS``, ``DEFAULT_MASKED_ROLE``,
+``ANONYMIZED_DATA_ROLE``, ``VALIDATE_FUNCTIONS``, ``ALLOW_CUSTOM_FUNCTIONS``, ``ENABLE_LOGGING``
+
+See :doc:`settings` for details.
+
 Utility Functions
 -----------------
 
-.. automodule:: django_postgres_anon.utils
-   :members: validate_anon_extension, get_anon_extension_info, switch_to_role, reset_role
-   :undoc-members:
+validate_anon_extension
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Check if PostgreSQL Anonymizer extension is installed and available.
+
+.. code-block:: python
+
+   from django_postgres_anon.utils import validate_anon_extension
+
+   if validate_anon_extension():
+       print('Extension is installed')
+   else:
+       print('Extension not available')
+
+Returns ``True`` if extension is installed, ``False`` otherwise.
+
+Commonly used in health checks and validation scripts.
 
 Management Commands
 -------------------

@@ -105,7 +105,7 @@ def sensitive_report(request):
 ### Privacy & Compliance
 
 - **🔒 Privacy by Design** - Reduce risk of data exposure in non-production environments
-- **📋 Compliance Support** - Tool to help with data protection requirements (consult legal counsel for compliance certification)
+- **📋 Compliance Support** - Tool to help with data protection requirements
 - **🛡️ Data Minimization** - Limit exposure of sensitive data to development teams
 
 ## 🤔 Why Not Just...?

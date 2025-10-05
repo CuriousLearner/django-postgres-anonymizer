@@ -140,7 +140,6 @@ REST_FRAMEWORK = {
 # Django PostgreSQL Anonymizer Settings
 POSTGRES_ANON = {
     "ENABLED": os.getenv("ANON_ENABLED", "True").lower() in ("true", "1", "yes"),
-    "AUTO_APPLY_RULES": os.getenv("ANON_AUTO_APPLY_RULES", "False").lower() in ("true", "1", "yes"),
     "VALIDATE_FUNCTIONS": os.getenv("ANON_VALIDATE_FUNCTIONS", "True").lower() in ("true", "1", "yes"),
     "ALLOW_CUSTOM_FUNCTIONS": os.getenv("ANON_ALLOW_CUSTOM_FUNCTIONS", "False").lower() in ("true", "1", "yes"),
     "ENABLE_LOGGING": os.getenv("ANON_ENABLE_LOGGING", "True").lower() in ("true", "1", "yes"),

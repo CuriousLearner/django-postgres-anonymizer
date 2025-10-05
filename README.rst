@@ -134,7 +134,7 @@ Privacy & Compliance
 - **🔒 Privacy by Design** - Reduce risk of data exposure in
   non-production environments
 - **📋 Compliance Support** - Tool to help with data protection
-  requirements (consult legal counsel for compliance certification)
+  requirements
 - **🛡️ Data Minimization** - Limit exposure of sensitive data to
   development teams
 
@@ -169,11 +169,13 @@ automatic, middleware-based anonymization that just works.
        C --> D[Anonymized Views]
        D --> E[Masked Data]
 
-**Core Components:** - **Middleware** - Automatic anonymization for user
-groups - **Context Managers** - Manual anonymized data access -
-**Decorators** - View-level anonymization - **Admin Interface** - Rule
-management and monitoring - **Management Commands** - CLI operations and
-automation
+**Core Components:**
+
+- **Middleware** - Automatic anonymization for user groups
+- **Context Managers** - Manual anonymized data access
+- **Decorators** - View-level anonymization
+- **Admin Interface** - Rule management and monitoring
+- **Management Commands** - CLI operations and automation
 
 🛡️ Security Features
 --------------------

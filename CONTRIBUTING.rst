@@ -117,7 +117,7 @@ Before submitting a PR, ensure your code passes all quality checks:
    - Follow the existing code style
    - Add tests for new functionality
    - Update documentation as needed
-   - Add your changes to ``CHANGELOG.md`` under ``[Unreleased]``
+   - Add your changes to ``CHANGELOG.rst`` or ``docs/changelog.rst``
 
 3. **Test your changes**
 

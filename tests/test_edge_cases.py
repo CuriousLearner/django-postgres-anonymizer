@@ -335,7 +335,6 @@ def test_configuration_system_provides_reasonable_defaults():
         "masked_groups",
         "anonymized_data_role",
         "enabled",
-        "auto_apply_rules",
         "validate_functions",
         "allow_custom_functions",
         "enable_logging",
@@ -403,6 +402,59 @@ def test_utils_handle_edge_case_inputs_safely():
         assert isinstance(suggestions, list)
         # Should always include hash as a fallback option
         assert any("hash" in suggestion for suggestion in suggestions)
+
+
+@pytest.mark.django_db
+def test_allow_custom_functions_setting():
+    """
+    Test that ALLOW_CUSTOM_FUNCTIONS setting properly controls validation.
+    """
+    from django.test import override_settings
+
+    from django_postgres_anon.utils import validate_function_syntax
+
+    custom_function = "my_custom_hash(column_name)"
+    anon_function = "anon.fake_email()"
+
+    # With ALLOW_CUSTOM_FUNCTIONS=False (default), custom functions should fail
+    with override_settings(POSTGRES_ANON={"ALLOW_CUSTOM_FUNCTIONS": False}):
+        assert validate_function_syntax(anon_function) is True
+        assert validate_function_syntax(custom_function) is False
+
+    # With ALLOW_CUSTOM_FUNCTIONS=True, custom functions should pass
+    with override_settings(POSTGRES_ANON={"ALLOW_CUSTOM_FUNCTIONS": True}):
+        assert validate_function_syntax(anon_function) is True
+        assert validate_function_syntax(custom_function) is True
+
+    # Dangerous patterns should still be blocked even with ALLOW_CUSTOM_FUNCTIONS=True
+    with override_settings(POSTGRES_ANON={"ALLOW_CUSTOM_FUNCTIONS": True}):
+        assert validate_function_syntax("DROP TABLE users;") is False
+        assert validate_function_syntax("my_func(); DROP TABLE users;") is False
+
+
+@pytest.mark.django_db
+def test_enable_logging_setting():
+    """
+    Test that ENABLE_LOGGING setting properly controls operation logging.
+    """
+    from django.test import override_settings
+
+    from django_postgres_anon.models import MaskingLog
+    from django_postgres_anon.utils import create_operation_log
+
+    # With ENABLE_LOGGING=True (default), logs should be created
+    with override_settings(POSTGRES_ANON={"ENABLE_LOGGING": True}):
+        initial_count = MaskingLog.objects.count()
+        log = create_operation_log("test_operation", success=True)
+        assert log is not None
+        assert MaskingLog.objects.count() == initial_count + 1
+
+    # With ENABLE_LOGGING=False, logs should NOT be created
+    with override_settings(POSTGRES_ANON={"ENABLE_LOGGING": False}):
+        initial_count = MaskingLog.objects.count()
+        log = create_operation_log("test_operation", success=True)
+        assert log is None
+        assert MaskingLog.objects.count() == initial_count
 
 
 if __name__ == "__main__":

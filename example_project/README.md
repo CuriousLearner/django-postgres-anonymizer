@@ -240,7 +240,6 @@ Use different settings for development, staging, and production:
 ```python
 # settings_production.py
 POSTGRES_ANON = {
-    'AUTO_APPLY_RULES': False,  # Never auto-apply in production
     'VALIDATE_FUNCTIONS': True,  # Always validate
     'ALLOW_CUSTOM_FUNCTIONS': False,  # Restrict to built-in functions
     'MASKED_GROUPS': ['qa_team', 'external_auditors'],  # Multiple groups for production

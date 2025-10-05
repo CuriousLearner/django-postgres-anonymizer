@@ -181,7 +181,6 @@ Development:
    POSTGRES_ANON = {
        'ENABLED': True,
        'MASKED_GROUPS': ['developers'],
-       'AUTO_APPLY_RULES': False,  # Manual control
    }
 
 Production:

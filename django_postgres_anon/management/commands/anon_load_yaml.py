@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 from django.core.management.base import BaseCommand, CommandError
 
+from django_postgres_anon.config import get_anon_setting
 from django_postgres_anon.models import MaskingPreset, MaskingRule
 from django_postgres_anon.utils import create_operation_log, validate_function_syntax
 
@@ -154,8 +155,9 @@ class Command(BaseCommand):
                     )
                     continue
 
-                # Validate function syntax if enabled
-                if options["validate"]:
+                # Validate function syntax if enabled (command option or global setting)
+                should_validate = options["validate"] or get_anon_setting("VALIDATE_FUNCTIONS")
+                if should_validate:
                     if not validate_function_syntax(function_expr):
                         errors.append(f"Rule {i + 1}: Invalid function syntax: {function_expr}")
                         continue

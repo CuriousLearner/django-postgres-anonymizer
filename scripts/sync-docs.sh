@@ -1,17 +1,28 @@
 #!/bin/bash
-# Sync all documentation files from Markdown to RST
-# This script keeps documentation in sync across formats
+# Sync documentation files
+# This script converts README.md to RST and adds toctree for Sphinx
 
 set -e
 
 echo "🔄 Syncing documentation files..."
 echo ""
 
-# README
-echo "📄 Converting README.md to README.rst..."
-pandoc README.md -f markdown -t rst -o README.rst
-echo "   Appending toctree to docs/index.rst..."
-cp README.rst docs/index.rst
+# Check if pandoc is installed
+if ! command -v pandoc &> /dev/null; then
+    echo "❌ Error: pandoc is not installed"
+    echo "   Install with: brew install pandoc (macOS) or apt-get install pandoc (Linux)"
+    exit 1
+fi
+
+# Convert README.md to RST for docs/index.rst
+echo "📄 Converting README.md to docs/index.rst..."
+pandoc README.md -f markdown -t rst -o docs/index.rst
+
+# Fix mermaid code blocks for Sphinx
+# Pandoc converts ```mermaid to .. code:: mermaid, but we need .. mermaid::
+sed -i '' 's/\.\. code:: mermaid/.. mermaid::/g' docs/index.rst
+
+# Append toctree to docs/index.rst
 cat >> docs/index.rst << 'EOF'
 
 .. toctree::
@@ -45,7 +56,7 @@ cat >> docs/index.rst << 'EOF'
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: API Reference
+   :caption: Reference
 
    reference/settings
    reference/api
@@ -59,18 +70,12 @@ cat >> docs/index.rst << 'EOF'
    changelog
 EOF
 
-# CHANGELOG
-echo "📝 Syncing CHANGELOG.rst to docs/changelog.rst..."
-cp CHANGELOG.rst docs/changelog.rst
-
-# CONTRIBUTING
-echo "🤝 Syncing CONTRIBUTING.rst to docs/contributing.rst..."
-cp CONTRIBUTING.rst docs/contributing.rst
-
 echo ""
 echo "✅ Documentation synced successfully!"
 echo ""
 echo "Files synced:"
-echo "  • README.md → README.rst → docs/index.rst"
-echo "  • CHANGELOG.rst → docs/changelog.rst"
-echo "  • CONTRIBUTING.rst → docs/contributing.rst"
+echo "  • README.md → docs/index.rst (with toctree appended)"
+echo ""
+echo "Note:"
+echo "  • docs/contributing.rst uses '.. include:: ../CONTRIBUTING.rst'"
+echo "  • docs/changelog.rst uses '.. include:: ../CHANGELOG.rst'"

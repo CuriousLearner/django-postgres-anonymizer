@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from django.conf import settings
 from django.db import DatabaseError, OperationalError, connection
 
+from django_postgres_anon.config import get_anon_setting
 from django_postgres_anon.constants import DEFAULT_POSTGRES_PORT
 
 logger = logging.getLogger(__name__)
@@ -53,8 +54,9 @@ def validate_function_syntax(function_expr: str) -> bool:
 
     function_expr = function_expr.strip()
 
-    # Must start with anon. namespace
-    if not function_expr.startswith("anon."):
+    # Must start with anon. namespace (unless ALLOW_CUSTOM_FUNCTIONS is enabled)
+    allow_custom = get_anon_setting("ALLOW_CUSTOM_FUNCTIONS")
+    if not allow_custom and not function_expr.startswith("anon."):
         return False
 
     # Must have parentheses
@@ -343,6 +345,10 @@ def generate_remove_anonymization_sql(table_name, column_name):
 def create_operation_log(operation, user=None, **kwargs):
     """Standardized logging for all operations"""
     from django_postgres_anon.models import MaskingLog
+
+    # Check if logging is enabled
+    if not get_anon_setting("ENABLE_LOGGING"):
+        return None
 
     # Extract common fields
     details = kwargs.pop("details", {})

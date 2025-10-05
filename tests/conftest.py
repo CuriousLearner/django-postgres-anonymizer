@@ -565,7 +565,6 @@ def anon_enabled_settings(settings):
     settings.POSTGRES_ANON = {
         "ENABLED": True,
         "DEFAULT_MASKED_ROLE": "masked_reader",
-        "AUTO_APPLY_RULES": False,
         "ENABLE_LOGGING": True,
     }
     return settings

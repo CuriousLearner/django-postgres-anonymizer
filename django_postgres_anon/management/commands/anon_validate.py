@@ -2,6 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 
+from django_postgres_anon.config import get_anon_setting
 from django_postgres_anon.models import MaskingLog, MaskingRule
 from django_postgres_anon.utils import (
     check_table_exists,
@@ -116,13 +117,16 @@ class Command(BaseCommand):
             else:
                 self.stdout.write("    ✅ Table and column exist")
 
-        # Validate function syntax
-        if not validate_function_syntax(rule.function_expr):
-            error = f"Invalid function syntax: '{rule.function_expr}'"
-            errors.append(error)
-            self.stdout.write(f"    ❌ {error}")
+        # Validate function syntax if enabled
+        if get_anon_setting("VALIDATE_FUNCTIONS"):
+            if not validate_function_syntax(rule.function_expr):
+                error = f"Invalid function syntax: '{rule.function_expr}'"
+                errors.append(error)
+                self.stdout.write(f"    ❌ {error}")
+            else:
+                self.stdout.write("    ✅ Function syntax valid")
         else:
-            self.stdout.write("    ✅ Function syntax valid")
+            self.stdout.write("    ⚠️  Function validation disabled (VALIDATE_FUNCTIONS=False)")
 
         # Check for potential issues
         try:

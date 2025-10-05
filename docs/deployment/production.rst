@@ -15,7 +15,6 @@ Security Settings
    POSTGRES_ANON = {
        'ENABLED': True,
        'MASKED_GROUPS': ['analysts', 'external_auditors'],
-       'AUTO_APPLY_RULES': False,         # NEVER enable in production
        'VALIDATE_FUNCTIONS': True,        # ALWAYS enable
        'ALLOW_CUSTOM_FUNCTIONS': False,   # Restrict to anon namespace
        'ENABLE_LOGGING': True,            # Required for compliance
@@ -29,7 +28,6 @@ Environment Variables
    # Production environment variables
    export POSTGRES_ANON_ENABLED=true
    export POSTGRES_ANON_MASKED_GROUPS=analysts,external_auditors
-   export POSTGRES_ANON_AUTO_APPLY_RULES=false
    export POSTGRES_ANON_VALIDATE_FUNCTIONS=true
    export POSTGRES_ANON_ALLOW_CUSTOM_FUNCTIONS=false
    export POSTGRES_ANON_ENABLE_LOGGING=true
@@ -79,10 +77,22 @@ Safe Deployment Steps
       python manage.py shell -c "
       from django_postgres_anon.context_managers import anonymized_data
       from django.contrib.auth.models import User
+
+      # Get original data
+      original_user = User.objects.first()
+      original_email = original_user.email if original_user else None
+
+      # Get anonymized data
       with anonymized_data():
-          user = User.objects.first()
-          assert '@anonymizer.com' in user.email
-          print('✓ Anonymization verified')
+          anon_user = User.objects.first()
+          anon_email = anon_user.email if anon_user else None
+
+      # Verify emails are different (anonymization is working)
+      if original_email and anon_email and original_email != anon_email:
+          print('✓ Anonymization verified: email changed')
+      else:
+          print('✗ Anonymization may not be working')
+      "
 
 Health Checks
 -------------
@@ -93,27 +103,30 @@ Add anonymization health checks to your monitoring:
 
    # health/views.py
    from django.http import JsonResponse
-   from django_postgres_anon.utils import get_anon_extension_info
-   from django_postgres_anon.config import get_config
+   from django_postgres_anon.utils import validate_anon_extension
+   from django_postgres_anon.config import get_anon_setting
+   from django_postgres_anon.models import MaskingRule
 
    def anonymization_health(request):
        try:
            # Check extension availability
-           extension_info = get_anon_extension_info()
-           if not extension_info:
+           extension_available = validate_anon_extension()
+           if not extension_available:
                return JsonResponse({
                    'status': 'error',
-                   'message': 'Anonymizer extension not available'
+                   'message': 'Anonymizer extension not installed'
                }, status=503)
 
-           # Check configuration
-           config = get_config()
+           # Check configuration and rules
+           enabled = get_anon_setting('ENABLED')
+           masked_groups = get_anon_setting('MASKED_GROUPS')
+           active_rules = MaskingRule.objects.filter(enabled=True).count()
 
            return JsonResponse({
                'status': 'healthy',
-               'extension_version': extension_info['version'],
-               'anonymization_enabled': config.enabled,
-               'masked_groups': config.masked_groups
+               'anonymization_enabled': enabled,
+               'masked_groups': masked_groups,
+               'active_rules': active_rules
            })
 
        except Exception as e:
@@ -150,44 +163,6 @@ Configure logging for audit and troubleshooting:
            },
        },
    }
-
-Performance Considerations
---------------------------
-
-Database Optimization
-~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: sql
-
-   -- Add indexes for frequently queried anonymization tables
-   CREATE INDEX CONCURRENTLY idx_masking_rule_active
-   ON django_postgres_anon_maskingrule(is_active)
-   WHERE is_active = true;
-
-   CREATE INDEX CONCURRENTLY idx_masking_log_timestamp
-   ON django_postgres_anon_maskinglog(timestamp);
-
-   -- Optimize group membership queries
-   CREATE INDEX CONCURRENTLY idx_auth_user_groups_user
-   ON auth_user_groups(user_id);
-
-Caching Group Membership
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Cache user group membership to reduce database queries:
-
-.. code-block:: python
-
-   # utils.py
-   from django.core.cache import cache
-
-   def get_user_groups(user):
-       cache_key = f'user_groups_{user.id}'
-       groups = cache.get(cache_key)
-       if groups is None:
-           groups = list(user.groups.values_list('name', flat=True))
-           cache.set(cache_key, groups, 300)  # 5 minutes
-       return groups
 
 Security Best Practices
 -----------------------
@@ -228,10 +203,9 @@ Common Issues
 
       # Validate current configuration
       python manage.py shell -c "
-      from django_postgres_anon.config import get_config
-      config = get_config()
-      print(f'Enabled: {config.enabled}')
-      print(f'Groups: {config.masked_groups}')
+      from django_postgres_anon.config import get_anon_setting
+      print(f'Enabled: {get_anon_setting(\"ENABLED\")}')
+      print(f'Groups: {get_anon_setting(\"MASKED_GROUPS\")}')
 
 Emergency Procedures
 ~~~~~~~~~~~~~~~~~~~~
@@ -240,13 +214,12 @@ If you need to quickly disable anonymization:
 
 .. code-block:: bash
 
-   # Method 1: Environment variable (requires restart)
+   # Set environment variable and restart application
    export POSTGRES_ANON_ENABLED=false
+   # Then restart your Django application
 
-   # Method 2: Temporary Django setting override
-   python manage.py shell -c "
-   from django.conf import settings
-   # Note: This only works if you restart the application
+   # Or update settings.py and restart
+   # POSTGRES_ANON = {'ENABLED': False}
 
 Compliance and Auditing
 -----------------------
@@ -259,6 +232,7 @@ Monitor anonymization operations through the built-in logging:
 .. code-block:: python
 
    # Generate audit report
+   from django.db.models import Count
    from django_postgres_anon.models import MaskingLog
 
    def audit_report(start_date, end_date):
@@ -270,7 +244,10 @@ Monitor anonymization operations through the built-in logging:
            'total_operations': logs.count(),
            'successful_operations': logs.filter(success=True).count(),
            'failed_operations': logs.filter(success=False).count(),
-           'operations_by_user': logs.values('user__username').annotate(
+           'operations_by_type': logs.values('operation').annotate(
+               count=Count('id')
+           ),
+           'operations_by_user': logs.values('user').annotate(
                count=Count('id')
            )
        }

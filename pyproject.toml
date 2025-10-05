@@ -222,7 +222,6 @@ DATABASE_URL = "sqlite:///:memory:"
 CACHE_BACKEND = "django.core.cache.backends.locmem.LocMemCache"
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 ANONYMIZED_DATA_ROLE = "test_masked_reader"
-POSTGRES_ANON_AUTO_APPLY_RULES = "false"
 POSTGRES_ANON_VALIDATE_FUNCTIONS = "true"
 
 # MyPy configuration

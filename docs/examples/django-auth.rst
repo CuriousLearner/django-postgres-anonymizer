@@ -33,11 +33,10 @@ What Gets Anonymized
 
 The ``django_auth`` preset anonymizes:
 
-* **Email:** ``john@example.com`` → ``user_12345@anonymizer.com``
-* **First Name:** ``John`` → ``FirstName_12345``
-* **Last Name:** ``Doe`` → ``LastName_12345``
-* **Username:** Kept for referential integrity
-* **Password:** Hashed to unusable value
+* **Email:** ``john@example.com`` → Fake email (e.g., ``alice.smith@example.com``)
+* **First Name:** ``John`` → Fake first name (e.g., ``Alice``)
+* **Last Name:** ``Doe`` → Fake last name (e.g., ``Smith``)
+* **Username:** Not anonymized by default (disabled to preserve login functionality)
 
 Usage Examples
 --------------

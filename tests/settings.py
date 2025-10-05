@@ -108,7 +108,6 @@ POSTGRES_ANON = {
     "MASKED_GROUPS": ["view_masked_data"],
     "ANONYMIZED_DATA_ROLE": "test_masked_reader",
     "ENABLED": True,
-    "AUTO_APPLY_RULES": False,
     "VALIDATE_FUNCTIONS": True,
     "ALLOW_CUSTOM_FUNCTIONS": False,
     "ENABLE_LOGGING": True,

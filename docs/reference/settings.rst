@@ -17,7 +17,6 @@ The main configuration dictionary containing all anonymization settings.
    POSTGRES_ANON = {
        'ENABLED': True,
        'MASKED_GROUPS': ['analysts', 'qa_team'],
-       'AUTO_APPLY_RULES': False,
        'VALIDATE_FUNCTIONS': True,
        'ALLOW_CUSTOM_FUNCTIONS': False,
        'ENABLE_LOGGING': True,
@@ -61,7 +60,7 @@ MASKED_GROUPS
 ~~~~~~~~~~~~~
 
 **Type:** ``list[str]``
-**Default:** ``[]``
+**Default:** ``['view_masked_data']``
 **Environment Variable:** ``POSTGRES_ANON_MASKED_GROUPS``
 
 List of Django user groups that should automatically see anonymized data.
@@ -85,34 +84,6 @@ List of Django user groups that should automatically see anonymized data.
 - Group names must match Django auth groups exactly
 - Empty list means no automatic anonymization
 - Case-sensitive group name matching
-
-AUTO_APPLY_RULES
-~~~~~~~~~~~~~~~~
-
-**Type:** ``bool``
-**Default:** ``False``
-**Environment Variable:** ``POSTGRES_ANON_AUTO_APPLY_RULES``
-
-Whether to automatically apply anonymization rules when models are created or updated.
-
-.. code-block:: python
-
-   POSTGRES_ANON = {
-       'AUTO_APPLY_RULES': True,  # Dangerous in production!
-   }
-
-**Environment Variable Usage:**
-
-.. code-block:: bash
-
-   export POSTGRES_ANON_AUTO_APPLY_RULES=true
-
-**⚠️ Security Warning:**
-
-- **NEVER** enable in production
-- Only suitable for development/testing environments
-- Can cause data loss if rules are misconfigured
-- Consider using management commands instead
 
 VALIDATE_FUNCTIONS
 ~~~~~~~~~~~~~~~~~~
@@ -217,7 +188,6 @@ Development
    POSTGRES_ANON = {
        'ENABLED': True,
        'MASKED_GROUPS': ['developers'],
-       'AUTO_APPLY_RULES': True,          # OK for development
        'VALIDATE_FUNCTIONS': True,
        'ALLOW_CUSTOM_FUNCTIONS': True,    # OK for testing
        'ENABLE_LOGGING': True,
@@ -232,7 +202,6 @@ Testing
    POSTGRES_ANON = {
        'ENABLED': True,
        'MASKED_GROUPS': [],               # No automatic masking in tests
-       'AUTO_APPLY_RULES': False,
        'VALIDATE_FUNCTIONS': True,
        'ALLOW_CUSTOM_FUNCTIONS': False,
        'ENABLE_LOGGING': False,           # Reduce test noise
@@ -247,7 +216,6 @@ Staging
    POSTGRES_ANON = {
        'ENABLED': True,
        'MASKED_GROUPS': ['qa_team', 'stakeholders'],
-       'AUTO_APPLY_RULES': False,
        'VALIDATE_FUNCTIONS': True,
        'ALLOW_CUSTOM_FUNCTIONS': False,
        'ENABLE_LOGGING': True,
@@ -262,7 +230,6 @@ Production
    POSTGRES_ANON = {
        'ENABLED': True,
        'MASKED_GROUPS': ['analysts', 'external_auditors'],
-       'AUTO_APPLY_RULES': False,         # NEVER in production
        'VALIDATE_FUNCTIONS': True,        # ALWAYS in production
        'ALLOW_CUSTOM_FUNCTIONS': False,   # NEVER in production
        'ENABLE_LOGGING': True,            # ALWAYS for compliance
@@ -278,7 +245,6 @@ All settings support environment variables following 12-factor principles:
    # .env file or environment
    POSTGRES_ANON_ENABLED=true
    POSTGRES_ANON_MASKED_GROUPS=analysts,qa_team
-   POSTGRES_ANON_AUTO_APPLY_RULES=false
    POSTGRES_ANON_VALIDATE_FUNCTIONS=true
    POSTGRES_ANON_ALLOW_CUSTOM_FUNCTIONS=false
    POSTGRES_ANON_ENABLE_LOGGING=true
@@ -318,94 +284,9 @@ Validation Rules
 
 1. **ENABLED**: Must be boolean or boolean-like string
 2. **MASKED_GROUPS**: Must be list of strings
-3. **AUTO_APPLY_RULES**: Must be boolean
-4. **VALIDATE_FUNCTIONS**: Must be boolean
-5. **ALLOW_CUSTOM_FUNCTIONS**: Must be boolean
-6. **ENABLE_LOGGING**: Must be boolean
-
-Django Settings Integration
----------------------------
-
-The package integrates with Django's settings system:
-
-.. code-block:: python
-
-   from django.conf import settings
-   from django_postgres_anon.config import get_config
-
-   # Access configuration
-   config = get_config()
-
-   if config.enabled:
-       # Anonymization is enabled
-       pass
-
-   # Check if user should see anonymized data
-   user_groups = user.groups.values_list('name', flat=True)
-   should_anonymize = any(group in config.masked_groups for group in user_groups)
-
-Configuration Inheritance
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Settings can be inherited and overridden:
-
-.. code-block:: python
-
-   # settings/base.py
-   POSTGRES_ANON = {
-       'VALIDATE_FUNCTIONS': True,
-       'ENABLE_LOGGING': True,
-   }
-
-   # settings/production.py
-   from .base import *
-
-   POSTGRES_ANON.update({
-       'ENABLED': True,
-       'MASKED_GROUPS': ['analysts'],
-       'AUTO_APPLY_RULES': False,
-   })
-
-Runtime Configuration Changes
------------------------------
-
-**⚠️ Important:** Configuration is read at Django startup and cached. Runtime changes require application restart.
-
-.. code-block:: python
-
-   # This WON'T work - settings are cached
-   from django.conf import settings
-   settings.POSTGRES_ANON['ENABLED'] = False
-
-   # Use environment variables and restart instead
-   # export POSTGRES_ANON_ENABLED=false
-
-Configuration Testing
----------------------
-
-Test your configuration in different environments:
-
-.. code-block:: python
-
-   # tests/test_configuration.py
-   from django.test import TestCase, override_settings
-   from django_postgres_anon.config import get_config
-
-   class ConfigurationTestCase(TestCase):
-       def test_default_configuration(self):
-           config = get_config()
-           self.assertFalse(config.enabled)  # Default is disabled
-           self.assertEqual(config.masked_groups, [])
-
-       @override_settings(POSTGRES_ANON={'ENABLED': True})
-       def test_enabled_configuration(self):
-           config = get_config()
-           self.assertTrue(config.enabled)
-
-       def test_environment_variable_parsing(self):
-           with self.settings(POSTGRES_ANON_ENABLED='true'):
-               config = get_config()
-               self.assertTrue(config.enabled)
+3. **VALIDATE_FUNCTIONS**: Must be boolean
+4. **ALLOW_CUSTOM_FUNCTIONS**: Must be boolean
+5. **ENABLE_LOGGING**: Must be boolean
 
 Common Configuration Issues
 ---------------------------
@@ -482,7 +363,6 @@ Production Security Checklist:
 - ✅ ``ENABLED``: ``True`` (if using anonymization)
 - ✅ ``VALIDATE_FUNCTIONS``: ``True`` (always)
 - ✅ ``ALLOW_CUSTOM_FUNCTIONS``: ``False`` (unless required)
-- ✅ ``AUTO_APPLY_RULES``: ``False`` (never in production)
 - ✅ ``ENABLE_LOGGING``: ``True`` (for compliance)
 - ✅ Use environment variables for all settings
 - ✅ Regularly audit ``MASKED_GROUPS`` membership

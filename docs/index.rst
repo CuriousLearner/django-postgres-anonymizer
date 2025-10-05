@@ -134,7 +134,7 @@ Privacy & Compliance
 - **🔒 Privacy by Design** - Reduce risk of data exposure in
   non-production environments
 - **📋 Compliance Support** - Tool to help with data protection
-  requirements (consult legal counsel for compliance certification)
+  requirements
 - **🛡️ Data Minimization** - Limit exposure of sensitive data to
   development teams
 
@@ -161,12 +161,13 @@ automatic, middleware-based anonymization that just works.
 🏗️ Architecture
 ---------------
 
-**Data Flow:**
+.. mermaid::
 
-1. Django App → Middleware/Context Manager
-2. Middleware/Context Manager → PostgreSQL Role Switch
-3. PostgreSQL Role Switch → Anonymized Views
-4. Anonymized Views → Masked Data
+   graph LR
+       A[Django App] --> B[Middleware/Context Manager]
+       B --> C[PostgreSQL Role Switch]
+       C --> D[Anonymized Views]
+       D --> E[Masked Data]
 
 **Core Components:**
 
@@ -324,7 +325,7 @@ Issues <https://github.com/CuriousLearner/django-postgres-anonymizer/issues>`__
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: API Reference
+   :caption: Reference
 
    reference/settings
    reference/api

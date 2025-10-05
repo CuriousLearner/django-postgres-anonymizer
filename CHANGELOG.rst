@@ -20,13 +20,21 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 **Changed**
 
 * Improved documentation structure and clarity
-* Refined compliance messaging - positions as compliance support tool
+* Contributing and changelog docs use RST include directives for single source of truth
+
+**Fixed**
+
+* ``ALLOW_CUSTOM_FUNCTIONS`` setting now properly controls validation
+* ``ENABLE_LOGGING`` setting now properly controls operation logging
+* ``VALIDATE_FUNCTIONS`` setting now properly controls function validation in management commands
+* API reference now documents only public-facing functions (``get_anon_setting``, ``validate_anon_extension``)
 
 **Removed**
 
 * ``database_role()`` context manager - unsafe arbitrary role switching
 * ``@database_role_required()`` decorator - potential security risk
 * Direct role manipulation utilities - use ``anonymized_data()`` instead
+* ``AUTO_APPLY_RULES`` setting - feature was never implemented, removed to avoid confusion
 
 0.1.0-alpha.1 - 2025-09-20
 --------------------------
