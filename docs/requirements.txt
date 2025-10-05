@@ -1,0 +1,9 @@
+# Documentation dependencies for ReadTheDocs
+sphinx>=6.0.0
+sphinx-book-theme>=1.0.0
+sphinxcontrib-napoleon>=0.7
+myst-parser>=2.0.0
+
+# Local development dependencies
+sphinx-autobuild>=2021.3.14
+sphinx-copybutton>=0.4.0

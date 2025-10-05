@@ -74,7 +74,7 @@ This example project demonstrates how to integrate and use django-postgres-anony
 2. **Load Sample Presets** (optional)
 
    ```bash
-   python manage.py anon_load_yaml ../django_postgres_anon/config/presets/django_auth.yaml
+   python manage.py anon_load_yaml django_auth
    ```
 
 ### Run the Demo
