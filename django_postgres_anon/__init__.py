@@ -20,7 +20,7 @@ from typing import Any, Dict
 import django
 from django.core.exceptions import ImproperlyConfigured
 
-__version__ = "0.1.0-alpha.1"
+__version__ = "0.1.0b1"
 __author__ = "Sanyam Khurana"
 __email__ = "sanyam@sanyamkhurana.com"
 __license__ = "BSD-3-Clause"

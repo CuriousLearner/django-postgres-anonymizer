@@ -23,8 +23,8 @@ django.setup()
 project = "Django PostgreSQL Anonymizer"
 copyright_text = "2025, Sanyam Khurana"
 author = "Sanyam Khurana"
-release = "0.2.0-beta.1"
-version = "0.2.0"
+release = "0.1.0b1"
+version = "0.1.0"
 
 # Sphinx expects 'copyright' variable
 copyright = copyright_text  # noqa: A001
