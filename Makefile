@@ -81,19 +81,19 @@ test-models: ## Run model tests
 	source $(VENV_DIR)/bin/activate && DJANGO_SETTINGS_MODULE=tests.settings python -m pytest tests/test_models.py -v --tb=short --no-cov --disable-warnings
 
 # Code quality
-lint: ## Run linting with flake8
+lint: ## Run linting with ruff
 	@echo "$(BLUE)Running linting checks...$(RESET)"
-	source $(VENV_DIR)/bin/activate && flake8 || echo "$(YELLOW)flake8 not installed, skipping...$(RESET)"
+	source $(VENV_DIR)/bin/activate && ruff check django_postgres_anon tests example_project || echo "$(YELLOW)ruff not installed, skipping...$(RESET)"
 
-format: ## Format code with black and isort
+format: ## Format code with ruff
 	@echo "$(BLUE)Formatting code...$(RESET)"
-	source $(VENV_DIR)/bin/activate && black django_postgres_anon tests example_project --line-length=120 || echo "$(YELLOW)black not installed, skipping...$(RESET)"
-	source $(VENV_DIR)/bin/activate && isort django_postgres_anon tests example_project --profile=black || echo "$(YELLOW)isort not installed, skipping...$(RESET)"
+	source $(VENV_DIR)/bin/activate && ruff check --fix django_postgres_anon tests example_project || echo "$(YELLOW)ruff not installed, skipping...$(RESET)"
+	source $(VENV_DIR)/bin/activate && ruff format django_postgres_anon tests example_project || echo "$(YELLOW)ruff not installed, skipping...$(RESET)"
 
 format-check: ## Check if code formatting is correct
 	@echo "$(BLUE)Checking code formatting...$(RESET)"
-	source $(VENV_DIR)/bin/activate && black --check django_postgres_anon tests example_project --line-length=120 || echo "$(YELLOW)black not installed, skipping...$(RESET)"
-	source $(VENV_DIR)/bin/activate && isort --check-only django_postgres_anon tests example_project --profile=black || echo "$(YELLOW)isort not installed, skipping...$(RESET)"
+	source $(VENV_DIR)/bin/activate && ruff check django_postgres_anon tests example_project || echo "$(YELLOW)ruff not installed, skipping...$(RESET)"
+	source $(VENV_DIR)/bin/activate && ruff format --check django_postgres_anon tests example_project || echo "$(YELLOW)ruff not installed, skipping...$(RESET)"
 
 type-check: ## Run type checking with mypy
 	@echo "$(BLUE)Running type checks...$(RESET)"

@@ -98,8 +98,8 @@ Before submitting a PR, ensure your code passes all quality checks:
 .. code:: bash
 
    make check  # Runs all checks below
-   make lint   # Flake8 linting
-   make format # Black + isort formatting
+   make lint   # Ruff linting
+   make format # Ruff formatting (auto-fix)
    make type-check  # MyPy type checking
    make security    # Bandit security scanning
 
@@ -216,9 +216,8 @@ For new features, please:
 Code Style
 ~~~~~~~~~~
 
-- Follow PEP 8 (enforced by flake8)
-- Use Black for code formatting
-- Use isort for import sorting
+- Follow PEP 8 (enforced by Ruff)
+- Use Ruff for code formatting and linting
 - Add type hints where possible
 - Write docstrings for public APIs
 
